@@ -2,6 +2,7 @@ package quiz_test
 
 import (
 	"fmt"
+	"io"
 	"testing"
 
 	"github.com/ilia-tsyplenkov/gophercises/quiz_game/quiz"
@@ -38,6 +39,25 @@ func TestGetQuestionAndAnswerFromSliceQuiz(t *testing.T) {
 
 		})
 	}
+}
+
+func TestErrorThanNoMoreQuestions(t *testing.T) {
+	questions := quiz.SliceQuiz{Data: [][2]string{}}
+	_, _, err := questions.NextQuestion()
+	if err != io.EOF {
+		t.Fatalf("expected to have EOF, but got %s\n", err)
+	}
+
+}
+
+func TestGetAnswerFromSliceAnswers(t *testing.T) {
+	answers := quiz.SliceAnswers{}
+	got, _ := answers.NextAnswer()
+	want := "10"
+	if got != want {
+		t.Fatalf("expected %q, but got %q\n", want, got)
+	}
+
 }
 
 // func TestFistSliceQuestionHasRightFromSlice(t *testing.T) {
