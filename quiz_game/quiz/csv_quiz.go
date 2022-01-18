@@ -26,7 +26,6 @@ func NewCsvQuizStore(filePath string) (*CsvQuizStore, error) {
 	if err != nil {
 		return nil, err
 	}
-	// defer fd.Close()
 	store := CsvQuizStore{reader: csv.NewReader(fd)}
 	return &store, nil
 }
