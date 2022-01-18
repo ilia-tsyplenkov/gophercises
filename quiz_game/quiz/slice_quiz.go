@@ -8,18 +8,26 @@ type SliceQuiz struct {
 }
 
 func (q *SliceQuiz) NextQuestion() (question, answer string, err error) {
-	if q.current == len(q.Data) {
+	if q.current >= len(q.Data) {
 		err = io.EOF
 		return
 	}
 	question, answer = q.Data[q.current][0], q.Data[q.current][1]
-	err = nil
 	q.current++
 	return
 }
 
-type SliceAnswers struct{}
+type SliceAnswers struct {
+	Data    []string
+	current int
+}
 
-func (a *SliceAnswers) NextAnswer() (string, error) {
-	return "10", nil
+func (a *SliceAnswers) NextAnswer() (answer string, err error) {
+	if a.current >= len(a.Data) {
+		err = io.EOF
+		return
+	}
+	answer = a.Data[a.current]
+	a.current++
+	return
 }

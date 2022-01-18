@@ -51,18 +51,37 @@ func TestErrorThanNoMoreQuestions(t *testing.T) {
 }
 
 func TestGetAnswerFromSliceAnswers(t *testing.T) {
-	answers := quiz.SliceAnswers{}
-	got, _ := answers.NextAnswer()
-	want := "10"
-	if got != want {
-		t.Fatalf("expected %q, but got %q\n", want, got)
+	testCases := []struct {
+		answers         []string
+		expectedAnswers []string
+	}{
+		{answers: []string{"10", "20"},
+			expectedAnswers: []string{"10", "20"}},
+
+		{answers: []string{"10", "20", "30"},
+			expectedAnswers: []string{"10", "20", "30"}},
+	}
+
+	for _, tc := range testCases {
+		t.Run(fmt.Sprintf("%dExistingAnswers%dExpedted", len(tc.answers), len(tc.expectedAnswers)), func(t *testing.T) {
+
+			answers := quiz.SliceAnswers{Data: tc.answers}
+			for _, want := range tc.expectedAnswers {
+				got, _ := answers.NextAnswer()
+				if got != want {
+					t.Fatalf("expected %q, but got %q\n", want, got)
+				}
+			}
+
+		})
 	}
 
 }
 
-// func TestFistSliceQuestionHasRightFromSlice(t *testing.T) {
-// 	questions := quiz.SliceQuiz{Data: [][2]string{{"10 + 10", "20"}}}
-// 	// answers := quiz.SliceAnswer{Data: []string{"20"}}
-//
-//
-// }
+func TestErrorWhenNoMoreAnswers(t *testing.T) {
+	answers := quiz.SliceAnswers{}
+	_, err := answers.NextAnswer()
+	if err != io.EOF {
+		t.Fatalf("expected to have EOF, but got %s\n", err)
+	}
+}
