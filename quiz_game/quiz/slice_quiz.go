@@ -2,12 +2,12 @@ package quiz
 
 import "io"
 
-type SliceQuiz struct {
+type SliceQuizStore struct {
 	Data    [][2]string
 	current int
 }
 
-func (q *SliceQuiz) NextQuestion() (question, answer string, err error) {
+func (q *SliceQuizStore) NextQuiz() (question, answer string, err error) {
 	if q.current >= len(q.Data) {
 		err = io.EOF
 		return
@@ -17,12 +17,12 @@ func (q *SliceQuiz) NextQuestion() (question, answer string, err error) {
 	return
 }
 
-type SliceAnswers struct {
+type SliceAnswerStore struct {
 	Data    []string
 	current int
 }
 
-func (a *SliceAnswers) NextAnswer() (answer string, err error) {
+func (a *SliceAnswerStore) NextAnswer() (answer string, err error) {
 	if a.current >= len(a.Data) {
 		err = io.EOF
 		return

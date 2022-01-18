@@ -8,7 +8,7 @@ import (
 	"github.com/ilia-tsyplenkov/gophercises/quiz_game/quiz"
 )
 
-func TestGetQuestionAndAnswerFromSliceQuiz(t *testing.T) {
+func TestGetQuestionAndAnswerFromSliceQuizStore(t *testing.T) {
 	testCases := []struct {
 		question_data [][2]string
 		answers       []string
@@ -29,9 +29,9 @@ func TestGetQuestionAndAnswerFromSliceQuiz(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("%dQuestions%dAnswers", len(tc.question_data), len(tc.answers)), func(t *testing.T) {
-			questions := quiz.SliceQuiz{Data: tc.question_data}
+			questions := quiz.SliceQuizStore{Data: tc.question_data}
 			for _, answer := range tc.answers {
-				question, correctAnswer, _ := questions.NextQuestion()
+				question, correctAnswer, _ := questions.NextQuiz()
 				if answer != correctAnswer {
 					t.Errorf("expected to have %q on %q question, but got %q", answer, question, correctAnswer)
 				}
@@ -42,15 +42,15 @@ func TestGetQuestionAndAnswerFromSliceQuiz(t *testing.T) {
 }
 
 func TestErrorThanNoMoreQuestions(t *testing.T) {
-	questions := quiz.SliceQuiz{Data: [][2]string{}}
-	_, _, err := questions.NextQuestion()
+	questions := quiz.SliceQuizStore{Data: [][2]string{}}
+	_, _, err := questions.NextQuiz()
 	if err != io.EOF {
 		t.Fatalf("expected to have EOF, but got %s\n", err)
 	}
 
 }
 
-func TestGetAnswerFromSliceAnswers(t *testing.T) {
+func TestGetAnswerFromSliceAnswerStore(t *testing.T) {
 	testCases := []struct {
 		answers         []string
 		expectedAnswers []string
@@ -65,7 +65,7 @@ func TestGetAnswerFromSliceAnswers(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("%dExistingAnswers%dExpedted", len(tc.answers), len(tc.expectedAnswers)), func(t *testing.T) {
 
-			answers := quiz.SliceAnswers{Data: tc.answers}
+			answers := quiz.SliceAnswerStore{Data: tc.answers}
 			for _, want := range tc.expectedAnswers {
 				got, _ := answers.NextAnswer()
 				if got != want {
@@ -79,7 +79,7 @@ func TestGetAnswerFromSliceAnswers(t *testing.T) {
 }
 
 func TestErrorWhenNoMoreAnswers(t *testing.T) {
-	answers := quiz.SliceAnswers{}
+	answers := quiz.SliceAnswerStore{}
 	_, err := answers.NextAnswer()
 	if err != io.EOF {
 		t.Fatalf("expected to have EOF, but got %s\n", err)
