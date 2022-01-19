@@ -41,7 +41,7 @@ func TestGetQuestionAndAnswerFromSliceQuizStore(t *testing.T) {
 	}
 }
 
-func TestErrorThanNoMoreQuestions(t *testing.T) {
+func TestErrorGetQuizWhenNoMoreRecordInSlice(t *testing.T) {
 	questions := quiz.SliceQuizStore{Data: [][2]string{}}
 	_, _, err := questions.NextQuiz()
 	if err != io.EOF {
@@ -78,7 +78,7 @@ func TestGetAnswerFromSliceAnswerStore(t *testing.T) {
 
 }
 
-func TestErrorWhenNoMoreAnswers(t *testing.T) {
+func TestErrorGetAnswerWhenNoMoreRecordInSlice(t *testing.T) {
 	answers := quiz.SliceAnswerStore{}
 	_, err := answers.NextAnswer()
 	if err != io.EOF {

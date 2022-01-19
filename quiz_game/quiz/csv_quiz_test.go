@@ -77,7 +77,7 @@ func TestGetQuestionAndAnswerFromCsvQuizStore(t *testing.T) {
 
 }
 
-func TestErrorGetCsvQuizWhenNoMoreRecord(t *testing.T) {
+func TestErrorGetQuizWhenNoMoreRecordInCsv(t *testing.T) {
 	testFile, _ := makeTestCsv("fake.csv", nil)
 	quizStore, err := quiz.NewCsvQuizStore(testFile)
 	if err != nil {
