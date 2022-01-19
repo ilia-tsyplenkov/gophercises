@@ -1,42 +1,15 @@
 package quiz_test
 
 import (
-	"encoding/csv"
 	"fmt"
 	"io"
-	"log"
-	"os"
 	"testing"
 
 	"github.com/ilia-tsyplenkov/gophercises/quiz_game/quiz"
+	"github.com/ilia-tsyplenkov/gophercises/quiz_game/test_sugar"
+	sugar "github.com/ilia-tsyplenkov/gophercises/quiz_game/test_sugar"
 )
 
-func makeTestCsv(filename string, records [][]string) (filePath string, answers []string) {
-
-	fd, err := os.Create(filename)
-	if err == os.ErrExist {
-		os.Remove(filename)
-		fd, err = os.Create(filename)
-		if err != nil {
-			panic(err)
-		}
-	}
-	defer fd.Close()
-	answers = make([]string, len(records))
-	w := csv.NewWriter(fd)
-	for i, record := range records {
-		if err := w.Write(record); err != nil {
-			log.Fatalln("error preparing csv test file:", err)
-		}
-		answers[i] = record[1]
-	}
-	w.Flush()
-	if err := w.Error(); err != nil {
-		log.Fatal(err)
-	}
-	return fd.Name(), answers
-
-}
 func TestGetQuestionAndAnswerFromCsvQuizStore(t *testing.T) {
 	testCases := []struct {
 		quizes  [][]string
@@ -56,7 +29,7 @@ func TestGetQuestionAndAnswerFromCsvQuizStore(t *testing.T) {
 		testName := fmt.Sprintf("%dQuestions%dAnswers", len(tc.quizes), len(tc.answers))
 		t.Run(testName, func(t *testing.T) {
 			testFile := "testName" + ".csv"
-			makeTestCsv(testFile, tc.quizes)
+			sugar.MakeTestCsv(testFile, tc.quizes)
 			store, err := quiz.NewCsvQuizStore(testFile)
 			if err != nil {
 				t.Errorf("unxpected error while creating CsvQuizStore: %s\n", err)
@@ -78,7 +51,7 @@ func TestGetQuestionAndAnswerFromCsvQuizStore(t *testing.T) {
 }
 
 func TestErrorGetQuizWhenNoMoreRecordInCsv(t *testing.T) {
-	testFile, _ := makeTestCsv("fake.csv", nil)
+	testFile, _ := test_sugar.MakeTestCsv("fake.csv", nil)
 	quizStore, err := quiz.NewCsvQuizStore(testFile)
 	if err != nil {
 		t.Errorf("unxpected error while creating CsvQuizStore: %s\n", err)
