@@ -46,7 +46,7 @@ func TestGameQuizQuestionsCorrectAnswers(t *testing.T) {
 
 			quizStore := &quiz.SliceQuizStore{Data: tc.quizData}
 			answerStore := &quiz.SliceAnswerStore{Data: tc.userAnswers}
-			game := QuizGame{quizStore, answerStore}
+			game := QuizGame{quizStore, answerStore, nil}
 			total, correct := game.CheckAnswers()
 			if total != tc.total {
 				t.Fatalf("expected to have %d total answered questions, but got %d\n", tc.total, total)
@@ -55,13 +55,5 @@ func TestGameQuizQuestionsCorrectAnswers(t *testing.T) {
 				t.Fatalf("expected to have %d correct answers but got %d\n", tc.correct, correct)
 			}
 		})
-	}
-}
-
-func TestStartQuizGame(t *testing.T) {
-	game := QuizGame{}
-	err := game.Launch()
-	if err != nil {
-		t.Errorf("expected success launch, but got %q", err)
 	}
 }
