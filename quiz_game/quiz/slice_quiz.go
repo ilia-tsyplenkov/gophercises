@@ -3,7 +3,7 @@ package quiz
 import "io"
 
 type SliceQuizStore struct {
-	Data    [][2]string
+	Data    [][]string
 	current int
 }
 

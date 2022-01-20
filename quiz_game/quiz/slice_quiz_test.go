@@ -10,19 +10,19 @@ import (
 
 func TestGetQuestionAndAnswerFromSliceQuizStore(t *testing.T) {
 	testCases := []struct {
-		question_data [][2]string
+		question_data [][]string
 		answers       []string
 	}{
 		{
-			[][2]string{{"10 + 10", "20"}},
+			[][]string{{"10 + 10", "20"}},
 			[]string{"20"},
 		},
 		{
-			[][2]string{{"10 + 10", "20"}, {"10 - 5", "5"}},
+			[][]string{{"10 + 10", "20"}, {"10 - 5", "5"}},
 			[]string{"20", "5"},
 		},
 		{
-			[][2]string{{"10 + 10", "20"}, {"10 - 5", "5"}, {"10 + 5", "15"}},
+			[][]string{{"10 + 10", "20"}, {"10 - 5", "5"}, {"10 + 5", "15"}},
 			[]string{"20", "5", "15"},
 		},
 	}
@@ -42,7 +42,7 @@ func TestGetQuestionAndAnswerFromSliceQuizStore(t *testing.T) {
 }
 
 func TestErrorGetQuizWhenNoMoreRecordInSlice(t *testing.T) {
-	questions := quiz.SliceQuizStore{Data: [][2]string{}}
+	questions := quiz.SliceQuizStore{Data: [][]string{}}
 	_, _, err := questions.NextQuiz()
 	if err != io.EOF {
 		t.Fatalf("expected to have EOF, but got %s\n", err)
