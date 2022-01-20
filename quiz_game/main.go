@@ -39,14 +39,14 @@ var defaultFile string = "problems.csv"
 
 func main() {
 
-	quizStore, err := quiz.NewCsvQuizStore(defaultFile)
+	quizFd, err := os.Open(defaultFile)
 	if err != nil {
 		log.Fatalln("error getting quiz data:", err)
 	}
-	answerStore, err := quiz.NewFileAnswerStore("")
-	if err != nil {
-		log.Fatalln("error getting file(file descriptor) for answers: ", err)
-	}
+	defer quizFd.Close()
+	quizStore := quiz.NewCsvQuizStore(quizFd)
+	answerStore := quiz.NewFileAnswerStore(os.Stdin)
+
 	game := QuizGame{quizStore, answerStore}
 	totalAnswers, correctAnswers := game.CheckAnswers()
 	fmt.Printf("Quiz results: total - %d, correct -%d\n", totalAnswers, correctAnswers)

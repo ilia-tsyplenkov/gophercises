@@ -10,20 +10,10 @@ type FileAnswerStore struct {
 	buffer *bufio.Reader
 }
 
-func NewFileAnswerStore(fileName string) (*FileAnswerStore, error) {
-	var fd *os.File
-	var err error
-	if fileName == "" {
-		fd = os.Stdin
-	} else {
-		fd, err = os.Open(fileName)
-		if err != nil {
-			return nil, err
-		}
-
-	}
-
-	return &FileAnswerStore{buffer: bufio.NewReader(fd)}, nil
+// Factory function which takes descriptor of file with answers
+// and returns pointer to FileAnswerStore.
+func NewFileAnswerStore(f *os.File) *FileAnswerStore {
+	return &FileAnswerStore{buffer: bufio.NewReader(f)}
 }
 
 func (s *FileAnswerStore) NextAnswer() (string, error) {

@@ -21,11 +21,8 @@ func (s *CsvQuizStore) NextQuiz() (string, string, error) {
 	return record[0], record[1], nil
 }
 
-func NewCsvQuizStore(filePath string) (*CsvQuizStore, error) {
-	fd, err := os.Open(filePath)
-	if err != nil {
-		return nil, err
-	}
-	store := CsvQuizStore{reader: csv.NewReader(fd)}
-	return &store, nil
+// Factory function which takes a describtor of csv filename
+// and returns a pointer to CsvQuizStore
+func NewCsvQuizStore(fd *os.File) *CsvQuizStore {
+	return &CsvQuizStore{reader: csv.NewReader(fd)}
 }

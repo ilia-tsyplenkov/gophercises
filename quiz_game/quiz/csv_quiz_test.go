@@ -3,6 +3,7 @@ package quiz_test
 import (
 	"fmt"
 	"io"
+	"os"
 	"testing"
 
 	"github.com/ilia-tsyplenkov/gophercises/quiz_game/quiz"
@@ -30,10 +31,12 @@ func TestGetQuestionAndAnswerFromCsvQuizStore(t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			testFile := "testName" + ".csv"
 			sugar.MakeTestCsv(testFile, tc.quizes)
-			store, err := quiz.NewCsvQuizStore(testFile)
-			if err != nil {
-				t.Errorf("unxpected error while creating CsvQuizStore: %s\n", err)
-			}
+			f, _ := os.Open(testFile)
+			defer func() {
+				defer f.Close()
+				os.Remove(testFile)
+			}()
+			store := quiz.NewCsvQuizStore(f)
 			for _, want := range tc.answers {
 				_, got, err := store.NextQuiz()
 				if err != nil {
@@ -52,11 +55,13 @@ func TestGetQuestionAndAnswerFromCsvQuizStore(t *testing.T) {
 
 func TestErrorGetQuizWhenNoMoreRecordInCsv(t *testing.T) {
 	testFile, _ := test_sugar.MakeTestCsv("fake.csv", nil)
-	quizStore, err := quiz.NewCsvQuizStore(testFile)
-	if err != nil {
-		t.Errorf("unxpected error while creating CsvQuizStore: %s\n", err)
-	}
-	_, _, err = quizStore.NextQuiz()
+	f, _ := os.Open(testFile)
+	defer func() {
+		defer f.Close()
+		os.Remove(testFile)
+	}()
+	quizStore := quiz.NewCsvQuizStore(f)
+	_, _, err := quizStore.NextQuiz()
 	if err != io.EOF {
 		t.Errorf("expecting to have EOF error while reading from empty file, but got %q\n", err)
 	}

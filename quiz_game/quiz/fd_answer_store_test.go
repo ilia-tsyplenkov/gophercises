@@ -3,6 +3,7 @@ package quiz_test
 import (
 	"fmt"
 	"io"
+	"os"
 	"testing"
 
 	"github.com/ilia-tsyplenkov/gophercises/quiz_game/quiz"
@@ -23,7 +24,12 @@ func TestGetRecordFromFileAnswerStore(t *testing.T) {
 			if err != nil {
 				t.Fatalf("error creating test answers file: %s\n", err)
 			}
-			answerStore, _ := quiz.NewFileAnswerStore(answersFile)
+			f, _ := os.Open(answersFile)
+			defer func() {
+				f.Close()
+				os.Remove(answersFile)
+			}()
+			answerStore := quiz.NewFileAnswerStore(f)
 			for _, want := range tc {
 				got, err := answerStore.NextAnswer()
 				if err != nil {
@@ -40,11 +46,8 @@ func TestGetRecordFromFileAnswerStore(t *testing.T) {
 }
 
 func TestErrorGetAnswerWhenNoRecordFile(t *testing.T) {
-	answerStore, err := quiz.NewFileAnswerStore("")
-	if err != nil {
-		t.Fatalf("error creating FileAnswerStore: %s\n", err)
-	}
-	_, err = answerStore.NextAnswer()
+	answerStore := quiz.NewFileAnswerStore(os.Stdin)
+	_, err := answerStore.NextAnswer()
 	if err != io.EOF {
 		t.Fatalf("expecting EOF while reading empty file, but got: %s\n", err)
 	}
