@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"time"
 
 	"github.com/ilia-tsyplenkov/gophercises/quiz_game/quiz"
 )
@@ -15,10 +16,25 @@ type QuizGame struct {
 	answerStore quiz.AnswerReader
 	// Place to show question for users
 	// No questiong will shown in case of nil
-	out io.Writer
+	out     io.Writer
+	timeout time.Duration
 }
 
 func (g *QuizGame) CheckAnswers() (total, correct int) {
+	var stop <-chan time.Time
+	if g.timeout > 0 {
+		stop = time.After(g.timeout)
+	}
+	answers := make(chan quiz.Answer)
+	go func() {
+		for {
+			ans := g.answerStore.NextAnswer()
+			answers <- ans
+			if ans.Err != nil {
+				break
+			}
+		}
+	}()
 	for {
 		question := g.quizStore.NextQuiz()
 		if question.Err != nil {
@@ -27,13 +43,17 @@ func (g *QuizGame) CheckAnswers() (total, correct int) {
 		if g.out != nil {
 			fmt.Fprintf(g.out, "%s: ", question.Question)
 		}
-		userAnswer := g.answerStore.NextAnswer()
-		if userAnswer.Err != nil {
+		select {
+		case <-stop:
 			return
-		}
-		total++
-		if question.Answer == userAnswer.Value {
-			correct++
+		case userAnswer := <-answers:
+			if userAnswer.Err != nil {
+				return
+			}
+			total++
+			if question.Answer == userAnswer.Value {
+				correct++
+			}
 		}
 	}
 }
@@ -55,7 +75,7 @@ func main() {
 	quizStore := quiz.NewCsvQuizStore(quizFd)
 	answerStore := quiz.NewFileAnswerStore(os.Stdin)
 
-	game := QuizGame{quizStore, answerStore, os.Stdout}
+	game := QuizGame{quizStore, answerStore, os.Stdout, 0}
 	totalAnswers, correctAnswers := game.CheckAnswers()
 	fmt.Printf("Quiz results: total - %d, correct - %d\n", totalAnswers, correctAnswers)
 }
