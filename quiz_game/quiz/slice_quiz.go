@@ -1,6 +1,9 @@
 package quiz
 
-import "io"
+import (
+	"io"
+	"time"
+)
 
 type SliceQuizStore struct {
 	Data    [][]string
@@ -32,4 +35,14 @@ func (a *SliceAnswerStore) NextAnswer() Answer {
 	next.Value = a.Data[a.current]
 	a.current++
 	return next
+}
+
+type SliceDelayedAnswerStore struct {
+	Store SliceAnswerStore
+	Delay time.Duration
+}
+
+func (a *SliceDelayedAnswerStore) NextAnswer() Answer {
+	time.Sleep(a.Delay)
+	return a.Store.NextAnswer()
 }

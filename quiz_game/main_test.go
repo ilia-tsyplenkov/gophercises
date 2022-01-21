@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/ilia-tsyplenkov/gophercises/quiz_game/quiz"
 )
@@ -56,4 +57,18 @@ func TestGameQuizQuestionsCorrectAnswers(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestQuizGameTimeIsUp(t *testing.T) {
+	gameTimeout := 10 * time.Millisecond
+	quizStore := &quiz.SliceQuizStore{Data: [][]string{{"10 + 10", "20"}}}
+	answerStore := &quiz.SliceDelayedAnswerStore{Store: quiz.SliceAnswerStore{Data: []string{"20"}}, Delay: 2 * gameTimeout}
+	game := QuizGame{quizStore: quizStore, answerStore: answerStore, out: nil}
+	total, _ := game.CheckAnswers()
+
+	want := 0
+	if total != want {
+		t.Fatalf("expected to have %d answered questions, but got - %d\n", total, want)
+	}
+
 }
