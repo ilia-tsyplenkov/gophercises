@@ -10,15 +10,17 @@ type CsvQuizStore struct {
 	reader *csv.Reader
 }
 
-func (s *CsvQuizStore) NextQuiz() (string, string, error) {
+func (s *CsvQuizStore) NextQuiz() Quiz {
+	next := Quiz{}
 	record, err := s.reader.Read()
 	if err != nil {
-		return "", "", err
+		next.Err = err
+	} else if len(record) != 2 {
+		next.Err = fmt.Errorf("wrong number of fields in a quiz record: %s. Expected 2 but got %d\n.", record, len(record))
+	} else {
+		next.Question, next.Answer = record[0], record[1]
 	}
-	if len(record) != 2 {
-		return "", "", fmt.Errorf("wrong number of fields in a quiz record: %s. Expected 2 but got %d\n.", record, len(record))
-	}
-	return record[0], record[1], nil
+	return next
 }
 
 // Factory function which takes a describtor of csv filename

@@ -16,12 +16,14 @@ func NewFileAnswerStore(f *os.File) *FileAnswerStore {
 	return &FileAnswerStore{buffer: bufio.NewReader(f)}
 }
 
-func (s *FileAnswerStore) NextAnswer() (string, error) {
+func (s *FileAnswerStore) NextAnswer() Answer {
+	next := Answer{}
 	answer, err := s.buffer.ReadString('\n')
 	if err != nil {
-		return "", err
+		next.Err = err
+	} else {
+		next.Value = strings.TrimSuffix(answer, "\n")
 	}
-	answer = strings.TrimSuffix(answer, "\n")
 
-	return answer, nil
+	return next
 }

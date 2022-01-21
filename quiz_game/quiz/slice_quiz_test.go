@@ -30,10 +30,11 @@ func TestGetQuestionAndAnswerFromSliceQuizStore(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("%dQuestions%dAnswers", len(tc.question_data), len(tc.answers)), func(t *testing.T) {
 			questions := quiz.SliceQuizStore{Data: tc.question_data}
-			for _, answer := range tc.answers {
-				question, correctAnswer, _ := questions.NextQuiz()
-				if answer != correctAnswer {
-					t.Errorf("expected to have %q on %q question, but got %q", answer, question, correctAnswer)
+			for _, userAnswer := range tc.answers {
+				q := questions.NextQuiz()
+				// question, correctAnswer, _ := questions.NextQuiz()
+				if q.Answer != userAnswer {
+					t.Errorf("expected to have %q on %q question, but got %q", userAnswer, q.Question, q.Answer)
 				}
 			}
 
@@ -43,9 +44,9 @@ func TestGetQuestionAndAnswerFromSliceQuizStore(t *testing.T) {
 
 func TestErrorGetQuizWhenNoMoreRecordInSlice(t *testing.T) {
 	questions := quiz.SliceQuizStore{Data: [][]string{}}
-	_, _, err := questions.NextQuiz()
-	if err != io.EOF {
-		t.Fatalf("expected to have EOF, but got %s\n", err)
+	q := questions.NextQuiz()
+	if q.Err != io.EOF {
+		t.Fatalf("expected to have EOF, but got %s\n", q.Err)
 	}
 
 }
@@ -67,7 +68,8 @@ func TestGetAnswerFromSliceAnswerStore(t *testing.T) {
 
 			answers := quiz.SliceAnswerStore{Data: tc.answers}
 			for _, want := range tc.expectedAnswers {
-				got, _ := answers.NextAnswer()
+				answer := answers.NextAnswer()
+				got := answer.Value
 				if got != want {
 					t.Fatalf("expected %q, but got %q\n", want, got)
 				}
@@ -80,8 +82,8 @@ func TestGetAnswerFromSliceAnswerStore(t *testing.T) {
 
 func TestErrorGetAnswerWhenNoMoreRecordInSlice(t *testing.T) {
 	answers := quiz.SliceAnswerStore{}
-	_, err := answers.NextAnswer()
-	if err != io.EOF {
-		t.Fatalf("expected to have EOF, but got %s\n", err)
+	answer := answers.NextAnswer()
+	if answer.Err != io.EOF {
+		t.Fatalf("expected to have EOF, but got %s\n", answer.Err)
 	}
 }

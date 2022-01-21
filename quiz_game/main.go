@@ -20,19 +20,19 @@ type QuizGame struct {
 
 func (g *QuizGame) CheckAnswers() (total, correct int) {
 	for {
-		question, rightAnswer, err := g.quizStore.NextQuiz()
-		if err != nil {
+		question := g.quizStore.NextQuiz()
+		if question.Err != nil {
+			return
+		}
+		if g.out != nil {
+			fmt.Fprintf(g.out, "%s: ", question.Question)
+		}
+		userAnswer := g.answerStore.NextAnswer()
+		if userAnswer.Err != nil {
 			return
 		}
 		total++
-		if g.out != nil {
-			fmt.Fprintf(g.out, "%s: ", question)
-		}
-		answer, err := g.answerStore.NextAnswer()
-		if err != nil {
-			return
-		}
-		if rightAnswer == answer {
+		if question.Answer == userAnswer.Value {
 			correct++
 		}
 	}

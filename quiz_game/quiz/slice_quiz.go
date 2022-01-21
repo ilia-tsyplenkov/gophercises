@@ -7,14 +7,15 @@ type SliceQuizStore struct {
 	current int
 }
 
-func (q *SliceQuizStore) NextQuiz() (question, answer string, err error) {
+func (q *SliceQuizStore) NextQuiz() Quiz {
+	next := Quiz{}
 	if q.current >= len(q.Data) {
-		err = io.EOF
-		return
+		next.Err = io.EOF
+		return next
 	}
-	question, answer = q.Data[q.current][0], q.Data[q.current][1]
+	next.Question, next.Answer = q.Data[q.current][0], q.Data[q.current][1]
 	q.current++
-	return
+	return next
 }
 
 type SliceAnswerStore struct {
@@ -22,12 +23,13 @@ type SliceAnswerStore struct {
 	current int
 }
 
-func (a *SliceAnswerStore) NextAnswer() (answer string, err error) {
+func (a *SliceAnswerStore) NextAnswer() Answer {
+	next := Answer{}
 	if a.current >= len(a.Data) {
-		err = io.EOF
-		return
+		next.Err = io.EOF
+		return next
 	}
-	answer = a.Data[a.current]
+	next.Value = a.Data[a.current]
 	a.current++
-	return
+	return next
 }
