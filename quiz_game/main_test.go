@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"io"
+	"os"
 	"testing"
 	"time"
 
@@ -70,5 +73,31 @@ func TestQuizGameTimeIsUp(t *testing.T) {
 	if total != want {
 		t.Fatalf("expected to have %d answered questions, but got - %d\n", total, want)
 	}
+
+}
+
+func TestGameShowGreeting(t *testing.T) {
+	greetingFile := "greeting.txt"
+	fd, _ := os.Create(greetingFile)
+	defer func() {
+		fd.Close()
+		os.Remove(fd.Name())
+	}()
+	game := QuizGame{
+		quizStore:   nil,
+		answerStore: nil,
+		out:         fd,
+		timeout:     0,
+	}
+	game.Greeting()
+
+	f, _ := os.Open(greetingFile)
+	buffer := bufio.NewReader(f)
+	_, err := buffer.ReadString('\n')
+
+	if err == io.EOF {
+		t.Fatal("expect to have some greeting, but got nothing.")
+	}
+	defer f.Close()
 
 }

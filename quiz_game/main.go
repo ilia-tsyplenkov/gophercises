@@ -60,6 +60,10 @@ func (g *QuizGame) CheckAnswers() (total, correct int) {
 	}
 }
 
+func (g *QuizGame) Greeting() {
+	fmt.Fprintln(g.out, "Welcome to the Quiz Game. Press any key to start:")
+}
+
 var quizFile string
 var timeout time.Duration
 
