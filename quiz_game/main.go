@@ -21,8 +21,10 @@ type QuizGame struct {
 }
 
 func (g *QuizGame) CheckAnswers() (total, correct int) {
+	log.Println("game timeout: ", g.timeout)
 	var stop <-chan time.Time
 	if g.timeout > 0 {
+		log.Println("stop channel activated")
 		stop = time.After(g.timeout)
 	}
 	answers := make(chan quiz.Answer)
@@ -59,9 +61,11 @@ func (g *QuizGame) CheckAnswers() (total, correct int) {
 }
 
 var quizFile string
+var timeout time.Duration
 
 func init() {
 	flag.StringVar(&quizFile, "quiz", "problems.csv", "csv file with question and correct answers")
+	flag.DurationVar(&timeout, "timeout", 30*time.Second, "quiz timeout")
 }
 
 func main() {
@@ -75,7 +79,7 @@ func main() {
 	quizStore := quiz.NewCsvQuizStore(quizFd)
 	answerStore := quiz.NewFileAnswerStore(os.Stdin)
 
-	game := QuizGame{quizStore, answerStore, os.Stdout, 0}
+	game := QuizGame{quizStore, answerStore, os.Stdout, timeout}
 	totalAnswers, correctAnswers := game.CheckAnswers()
 	fmt.Printf("Quiz results: total - %d, correct - %d\n", totalAnswers, correctAnswers)
 }
