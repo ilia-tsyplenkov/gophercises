@@ -13,19 +13,20 @@ import (
 )
 
 type QuizGame struct {
-	quizStore   quiz.QuizReader
-	answerStore quiz.AnswerReader
-	// Place to show question for users
-	// No questiong will shown in case of nil
-	out     io.Writer
-	timeout time.Duration
+	quiz.QuizReader
+	quiz.AnswerReader
 	// reader to define user readiness
 	// won't expect readiness in case of nil
 	in io.Reader
+	// Place to show question for users
+	// No questiong will shown in case of nil
+	out io.Writer
+	// Stop quiz timeout
+	timeout time.Duration
 }
 
 func (g *QuizGame) CheckAnswers() (total, correct int) {
-	total = g.quizStore.Total()
+	total = g.Total()
 	var stop <-chan time.Time
 	if g.timeout > 0 {
 		stop = time.After(g.timeout)
@@ -33,7 +34,7 @@ func (g *QuizGame) CheckAnswers() (total, correct int) {
 	answers := make(chan quiz.Answer)
 	go func() {
 		for {
-			ans := g.answerStore.NextAnswer()
+			ans := g.NextAnswer()
 			answers <- ans
 			if ans.Err != nil {
 				break
@@ -41,7 +42,7 @@ func (g *QuizGame) CheckAnswers() (total, correct int) {
 		}
 	}()
 	for {
-		question := g.quizStore.NextQuiz()
+		question := g.NextQuiz()
 		if question.Err != nil {
 			return
 		}
@@ -98,7 +99,13 @@ func main() {
 	quizStore, _ := quiz.NewSliceQuizFromCsv(quizFd)
 	answerStore := quiz.NewFileAnswerStore(os.Stdin)
 
-	game := QuizGame{quizStore, answerStore, os.Stdout, timeout, os.Stdin}
+	game := QuizGame{
+		QuizReader:   quizStore,
+		AnswerReader: answerStore,
+		in:           os.Stdin,
+		out:          os.Stdout,
+		timeout:      timeout,
+	}
 	game.Greeting()
 	game.waitUserReadiness()
 	totalAnswers, correctAnswers := game.CheckAnswers()
