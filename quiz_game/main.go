@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"io"
@@ -18,6 +19,8 @@ type QuizGame struct {
 	// No questiong will shown in case of nil
 	out     io.Writer
 	timeout time.Duration
+	// reader to define user readiness
+	in io.Reader
 }
 
 func (g *QuizGame) CheckAnswers() (total, correct int) {
@@ -62,6 +65,16 @@ func (g *QuizGame) Greeting() {
 	fmt.Fprintln(g.out, "Welcome to the Quiz Game. Press any key to start:")
 }
 
+func (g *QuizGame) waitUserReadiness() {
+	buffer := bufio.NewReader(g.in)
+	for {
+		_, err := buffer.ReadString('\n')
+		if err == nil {
+			break
+		}
+	}
+}
+
 var quizFile string
 var timeout time.Duration
 
@@ -81,7 +94,7 @@ func main() {
 	quizStore := quiz.NewCsvQuizStore(quizFd)
 	answerStore := quiz.NewFileAnswerStore(os.Stdin)
 
-	game := QuizGame{quizStore, answerStore, os.Stdout, timeout}
+	game := QuizGame{quizStore, answerStore, os.Stdout, timeout, nil}
 	totalAnswers, correctAnswers := game.CheckAnswers()
 	fmt.Printf("Quiz results: total - %d, correct - %d\n", totalAnswers, correctAnswers)
 }

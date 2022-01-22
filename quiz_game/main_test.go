@@ -50,7 +50,7 @@ func TestGameQuizQuestionsCorrectAnswers(t *testing.T) {
 
 			quizStore := &quiz.SliceQuizStore{Data: tc.quizData}
 			answerStore := &quiz.SliceAnswerStore{Data: tc.userAnswers}
-			game := QuizGame{quizStore, answerStore, nil, 0}
+			game := QuizGame{quizStore, answerStore, nil, 0, nil}
 			total, correct := game.CheckAnswers()
 			if total != tc.total {
 				t.Fatalf("expected to have %d total answered questions, but got %d\n", tc.total, total)
@@ -80,24 +80,53 @@ func TestGameShowGreeting(t *testing.T) {
 	greetingFile := "greeting.txt"
 	fd, _ := os.Create(greetingFile)
 	defer func() {
+		os.Remove(greetingFile)
 		fd.Close()
-		os.Remove(fd.Name())
 	}()
 	game := QuizGame{
-		quizStore:   nil,
-		answerStore: nil,
-		out:         fd,
-		timeout:     0,
+		out: fd,
 	}
+	// Write greeting message
 	game.Greeting()
+	// Back in the begininng of the file
+	fd.Seek(0, 0)
 
-	f, _ := os.Open(greetingFile)
-	buffer := bufio.NewReader(f)
+	// Check that greeting message has been written
+	buffer := bufio.NewReader(fd)
 	_, err := buffer.ReadString('\n')
 
 	if err == io.EOF {
 		t.Fatal("expect to have some greeting, but got nothing.")
 	}
-	defer f.Close()
 
+}
+
+func TestGameAcceptUserReadiness(t *testing.T) {
+	fileName := "rediness.txt"
+	fd, _ := os.Create(fileName)
+	defer func() {
+		fd.Close()
+		os.Remove(fileName)
+	}()
+	fmt.Fprintf(fd, "Y\n")
+	// Back in the begininng of the file
+	fd.Seek(0, 0)
+	game := QuizGame{
+		in: fd,
+	}
+
+	// g.waitUserReadiness()
+	ready := make(chan struct{})
+	go func() {
+		game.waitUserReadiness()
+		ready <- struct{}{}
+	}()
+	for {
+		select {
+		case <-ready:
+			return
+		case <-time.After(100 * time.Millisecond):
+			t.Fatalf("expected accepting user readiness, but user answer has been ignored.\n")
+		}
+	}
 }
