@@ -21,10 +21,8 @@ type QuizGame struct {
 }
 
 func (g *QuizGame) CheckAnswers() (total, correct int) {
-	log.Println("game timeout: ", g.timeout)
 	var stop <-chan time.Time
 	if g.timeout > 0 {
-		log.Println("stop channel activated")
 		stop = time.After(g.timeout)
 	}
 	answers := make(chan quiz.Answer)
