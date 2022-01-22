@@ -31,10 +31,11 @@ func TestGetRecordFromFileAnswerStore(t *testing.T) {
 			}()
 			answerStore := quiz.NewFileAnswerStore(f)
 			for _, want := range tc {
-				got, err := answerStore.NextAnswer()
-				if err != nil {
-					t.Fatalf("error getting answer: %s\n", err)
+				answer := answerStore.NextAnswer()
+				if answer.Err != nil {
+					t.Fatalf("error getting answer: %s\n", answer.Err)
 				}
+				got := answer.Value
 				if got != want {
 					t.Errorf("expected %q, but got %q\n", want, got)
 				}
@@ -47,8 +48,8 @@ func TestGetRecordFromFileAnswerStore(t *testing.T) {
 
 func TestErrorGetAnswerWhenNoRecordFile(t *testing.T) {
 	answerStore := quiz.NewFileAnswerStore(os.Stdin)
-	_, err := answerStore.NextAnswer()
-	if err != io.EOF {
-		t.Fatalf("expecting EOF while reading empty file, but got: %s\n", err)
+	answer := answerStore.NextAnswer()
+	if answer.Err != io.EOF {
+		t.Fatalf("expecting EOF while reading empty file, but got: %s\n", answer.Err)
 	}
 }

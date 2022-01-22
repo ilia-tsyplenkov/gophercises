@@ -36,12 +36,14 @@ func TestGetQuestionAndAnswerFromCsvQuizStore(t *testing.T) {
 				defer f.Close()
 				os.Remove(testFile)
 			}()
-			store := quiz.NewCsvQuizStore(f)
+			// store := quiz.NewCsvQuizStore(f)
+			store, _ := quiz.NewSliceQuizFromCsv(f)
 			for _, want := range tc.answers {
-				_, got, err := store.NextQuiz()
-				if err != nil {
-					t.Fatalf("unexpected error during csv quiz reading: %s\n", err)
+				q := store.NextQuiz()
+				if q.Err != nil {
+					t.Fatalf("unexpected error during csv quiz reading: %s\n", q.Err)
 				}
+				got := q.Answer
 				if got != want {
 					t.Errorf("expected %q but got %q\n", want, got)
 				}
@@ -60,9 +62,9 @@ func TestErrorGetQuizWhenNoMoreRecordInCsv(t *testing.T) {
 		defer f.Close()
 		os.Remove(testFile)
 	}()
-	quizStore := quiz.NewCsvQuizStore(f)
-	_, _, err := quizStore.NextQuiz()
-	if err != io.EOF {
-		t.Errorf("expecting to have EOF error while reading from empty file, but got %q\n", err)
+	quizStore, _ := quiz.NewSliceQuizFromCsv(f)
+	q := quizStore.NextQuiz()
+	if q.Err != io.EOF {
+		t.Errorf("expecting to have EOF error while reading from empty file, but got %q\n", q.Err)
 	}
 }
