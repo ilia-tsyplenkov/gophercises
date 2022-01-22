@@ -1,7 +1,9 @@
 package quiz
 
 import (
+	"encoding/csv"
 	"io"
+	"os"
 	"time"
 )
 
@@ -19,6 +21,21 @@ func (q *SliceQuizStore) NextQuiz() Quiz {
 	next.Question, next.Answer = q.Data[q.current][0], q.Data[q.current][1]
 	q.current++
 	return next
+}
+
+func (q *SliceQuizStore) Total() int {
+	return len(q.Data)
+}
+
+// Factory function which get file descriptor and reads all records
+// into SliceQuizStore
+func NewSliceQuizFromCsv(fd *os.File) (*SliceQuizStore, error) {
+	data, err := csv.NewReader(fd).ReadAll()
+	if err != nil {
+		return nil, err
+	}
+	return &SliceQuizStore{Data: data}, nil
+
 }
 
 type SliceAnswerStore struct {

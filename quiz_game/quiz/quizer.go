@@ -4,6 +4,7 @@ package quiz
 // and returns question, correct answer and error
 type QuizReader interface {
 	NextQuiz() Quiz
+	Total() int
 }
 
 // AnswerReader interface returns real answer and error

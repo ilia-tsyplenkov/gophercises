@@ -66,11 +66,11 @@ func TestQuizGameTimeIsUp(t *testing.T) {
 	quizStore := &quiz.SliceQuizStore{Data: [][]string{{"10 + 10", "20"}}}
 	answerStore := &quiz.SliceDelayedAnswerStore{Store: quiz.SliceAnswerStore{Data: []string{"20"}}, Delay: 2 * gameTimeout}
 	game := QuizGame{quizStore: quizStore, answerStore: answerStore, out: nil, timeout: gameTimeout}
-	total, _ := game.CheckAnswers()
+	_, answered := game.CheckAnswers()
 
 	want := 0
-	if total != want {
-		t.Fatalf("expected to have %d answered questions, but got - %d\n", total, want)
+	if answered != want {
+		t.Fatalf("expected to have %d answered questions, but got - %d\n", answered, want)
 	}
 
 }
@@ -127,4 +127,9 @@ func TestGameAcceptUserReadiness(t *testing.T) {
 			t.Fatalf("expected accepting user readiness, but user answer has been ignored.\n")
 		}
 	}
+}
+
+func TestGameNoUserReadinessProvided(t *testing.T) {
+	game := QuizGame{}
+	game.waitUserReadiness()
 }

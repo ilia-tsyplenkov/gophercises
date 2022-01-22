@@ -20,10 +20,12 @@ type QuizGame struct {
 	out     io.Writer
 	timeout time.Duration
 	// reader to define user readiness
+	// won't expect readiness in case of nil
 	in io.Reader
 }
 
 func (g *QuizGame) CheckAnswers() (total, correct int) {
+	total = g.quizStore.Total()
 	var stop <-chan time.Time
 	if g.timeout > 0 {
 		stop = time.After(g.timeout)
@@ -53,7 +55,6 @@ func (g *QuizGame) CheckAnswers() (total, correct int) {
 			if userAnswer.Err != nil {
 				return
 			}
-			total++
 			if question.Answer == userAnswer.Value {
 				correct++
 			}
@@ -66,6 +67,9 @@ func (g *QuizGame) Greeting() {
 }
 
 func (g *QuizGame) waitUserReadiness() {
+	if g.in == nil {
+		return
+	}
 	buffer := bufio.NewReader(g.in)
 	for {
 		_, err := buffer.ReadString('\n')
@@ -91,12 +95,12 @@ func main() {
 		log.Fatalln("error getting quiz data:", err)
 	}
 	defer quizFd.Close()
-	quizStore := quiz.NewCsvQuizStore(quizFd)
+	quizStore, _ := quiz.NewSliceQuizFromCsv(quizFd)
 	answerStore := quiz.NewFileAnswerStore(os.Stdin)
 
 	game := QuizGame{quizStore, answerStore, os.Stdout, timeout, os.Stdin}
 	game.Greeting()
 	game.waitUserReadiness()
 	totalAnswers, correctAnswers := game.CheckAnswers()
-	fmt.Printf("Quiz results: total - %d, correct - %d\n", totalAnswers, correctAnswers)
+	fmt.Printf("\nQuiz results: total - %d, correct - %d\n", totalAnswers, correctAnswers)
 }

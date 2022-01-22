@@ -36,7 +36,8 @@ func TestGetQuestionAndAnswerFromCsvQuizStore(t *testing.T) {
 				defer f.Close()
 				os.Remove(testFile)
 			}()
-			store := quiz.NewCsvQuizStore(f)
+			// store := quiz.NewCsvQuizStore(f)
+			store, _ := quiz.NewSliceQuizFromCsv(f)
 			for _, want := range tc.answers {
 				q := store.NextQuiz()
 				if q.Err != nil {
@@ -61,7 +62,7 @@ func TestErrorGetQuizWhenNoMoreRecordInCsv(t *testing.T) {
 		defer f.Close()
 		os.Remove(testFile)
 	}()
-	quizStore := quiz.NewCsvQuizStore(f)
+	quizStore, _ := quiz.NewSliceQuizFromCsv(f)
 	q := quizStore.NextQuiz()
 	if q.Err != io.EOF {
 		t.Errorf("expecting to have EOF error while reading from empty file, but got %q\n", q.Err)
