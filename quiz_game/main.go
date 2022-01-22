@@ -62,7 +62,7 @@ func (g *QuizGame) CheckAnswers() (total, correct int) {
 }
 
 func (g *QuizGame) Greeting() {
-	fmt.Fprintln(g.out, "Welcome to the Quiz Game. Press any key to start:")
+	fmt.Fprint(g.out, "Welcome to the Quiz Game. Press any key to start:")
 }
 
 func (g *QuizGame) waitUserReadiness() {
@@ -94,7 +94,9 @@ func main() {
 	quizStore := quiz.NewCsvQuizStore(quizFd)
 	answerStore := quiz.NewFileAnswerStore(os.Stdin)
 
-	game := QuizGame{quizStore, answerStore, os.Stdout, timeout, nil}
+	game := QuizGame{quizStore, answerStore, os.Stdout, timeout, os.Stdin}
+	game.Greeting()
+	game.waitUserReadiness()
 	totalAnswers, correctAnswers := game.CheckAnswers()
 	fmt.Printf("Quiz results: total - %d, correct - %d\n", totalAnswers, correctAnswers)
 }

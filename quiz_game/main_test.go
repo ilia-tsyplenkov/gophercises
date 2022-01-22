@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"io"
 	"os"
 	"testing"
 	"time"
@@ -93,9 +92,9 @@ func TestGameShowGreeting(t *testing.T) {
 
 	// Check that greeting message has been written
 	buffer := bufio.NewReader(fd)
-	_, err := buffer.ReadString('\n')
+	userReadiness, err := buffer.ReadString('\n')
 
-	if err == io.EOF {
+	if err != nil && userReadiness == "" {
 		t.Fatal("expect to have some greeting, but got nothing.")
 	}
 
@@ -115,7 +114,6 @@ func TestGameAcceptUserReadiness(t *testing.T) {
 		in: fd,
 	}
 
-	// g.waitUserReadiness()
 	ready := make(chan struct{})
 	go func() {
 		game.waitUserReadiness()
