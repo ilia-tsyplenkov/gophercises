@@ -5,6 +5,7 @@ package quiz
 type QuizReader interface {
 	NextQuiz() Quiz
 	Total() int
+	Shuffle()
 }
 
 // AnswerReader interface returns real answer and error

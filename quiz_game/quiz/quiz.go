@@ -3,6 +3,7 @@ package quiz
 import (
 	"encoding/csv"
 	"io"
+	"math/rand"
 	"os"
 	"time"
 )
@@ -25,6 +26,11 @@ func (q *SliceQuizStore) NextQuiz() Quiz {
 
 func (q *SliceQuizStore) Total() int {
 	return len(q.Data)
+}
+
+func (q *SliceQuizStore) Shuffle() {
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(q.Data), func(i, j int) { q.Data[i], q.Data[j] = q.Data[j], q.Data[i] })
 }
 
 // Factory function which get file descriptor and reads all records
@@ -55,11 +61,11 @@ func (a *SliceAnswerStore) NextAnswer() Answer {
 }
 
 type SliceDelayedAnswerStore struct {
-	Store SliceAnswerStore
+	SliceAnswerStore
 	Delay time.Duration
 }
 
 func (a *SliceDelayedAnswerStore) NextAnswer() Answer {
 	time.Sleep(a.Delay)
-	return a.Store.NextAnswer()
+	return a.SliceAnswerStore.NextAnswer()
 }
