@@ -97,7 +97,7 @@ func TestGameShowGreeting(t *testing.T) {
 		out: fd,
 	}
 	// Write greeting message
-	game.Greeting()
+	game.greeting()
 	// Back in the begininng of the file
 	fd.Seek(0, 0)
 
