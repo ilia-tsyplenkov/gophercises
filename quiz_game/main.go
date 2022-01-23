@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/ilia-tsyplenkov/gophercises/quiz_game/quiz"
@@ -56,7 +57,7 @@ func (g *QuizGame) CheckAnswers() (total, correct int) {
 			if userAnswer.Err != nil {
 				return
 			}
-			if question.Answer == userAnswer.Value {
+			if CorrectIt(question.Answer) == CorrectIt(userAnswer.Value) {
 				correct++
 			}
 		}
@@ -78,6 +79,11 @@ func (g *QuizGame) waitUserReadiness() {
 			break
 		}
 	}
+}
+
+func CorrectIt(s string) string {
+	s = strings.Trim(s, " \n\t")
+	return strings.ToLower(s)
 }
 
 var quizFile string

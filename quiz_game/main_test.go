@@ -12,40 +12,51 @@ import (
 
 func TestGameQuizQuestionsCorrectAnswers(t *testing.T) {
 	testCases := []struct {
+		title       string
 		quizData    [][]string
 		userAnswers []string
 		total       int
 		correct     int
 	}{
 		{
+			title:       "1Question1TotalAnswer1CorrectAnswer",
 			quizData:    [][]string{{"10 + 10", "20"}},
 			userAnswers: []string{"20"},
 			total:       1,
 			correct:     1,
 		},
 		{
+			title:       "1Question1TotalAnswer0CorrectAnswer",
 			quizData:    [][]string{{"10 + 10", "20"}},
 			userAnswers: []string{"25"},
 			total:       1,
 			correct:     0,
 		},
 		{
+			title:       "2Questions2TotalAnswers2CorrectAnswers",
 			quizData:    [][]string{{"10 + 10", "20"}, {"20-5", "15"}},
 			userAnswers: []string{"20", "15"},
 			total:       2,
 			correct:     2,
 		},
 		{
+			title:       "2Questions2TotalAnswers1CorrectAnswer",
 			quizData:    [][]string{{"10 + 10", "20"}, {"20-5", "15"}},
 			userAnswers: []string{"20", "10"},
 			total:       2,
 			correct:     1,
 		},
+		{
+			title:       "CorrectAnswersBeforeCompare",
+			quizData:    [][]string{{"What's you favorite program language", " Go\t"}, {"What's our planet name?", "\nEARTH "}},
+			userAnswers: []string{"  gO\n", "\t  eaRtH \n"},
+			total:       2,
+			correct:     2,
+		},
 	}
 
 	for _, tc := range testCases {
-		testName := fmt.Sprintf("%dQuestions%dTotalAnswers%dCorrectAnswers", len(tc.quizData), tc.total, tc.correct)
-		t.Run(testName, func(t *testing.T) {
+		t.Run(tc.title, func(t *testing.T) {
 
 			quizStore := &quiz.SliceQuizStore{Data: tc.quizData}
 			answerStore := &quiz.SliceAnswerStore{Data: tc.userAnswers}
@@ -132,4 +143,24 @@ func TestGameAcceptUserReadiness(t *testing.T) {
 func TestGameNoUserReadinessProvided(t *testing.T) {
 	game := QuizGame{}
 	game.waitUserReadiness()
+}
+
+func TestCorrectIt(t *testing.T) {
+	testCases := []struct {
+		initial string
+		want    string
+	}{
+		{" 10 ", "10"},
+		{"  Spaces \n", "spaces"},
+		{"\tTabs\t", "tabs"},
+		{"\t  SpacesAndTabs\t  ", "spacesandtabs"},
+		{"\nLineFeed\n", "linefeed"},
+	}
+	for _, tc := range testCases {
+		got := CorrectIt(tc.initial)
+		want := tc.want
+		if got != want {
+			t.Errorf("expected to have %q after correction of %q but got %q\n", want, tc.initial, got)
+		}
+	}
 }
