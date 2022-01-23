@@ -3,6 +3,7 @@ package quiz_test
 import (
 	"fmt"
 	"io"
+	"reflect"
 	"testing"
 
 	"github.com/ilia-tsyplenkov/gophercises/quiz_game/quiz"
@@ -49,6 +50,29 @@ func TestErrorGetQuizWhenNoMoreRecordInSlice(t *testing.T) {
 		t.Fatalf("expected to have EOF, but got %s\n", q.Err)
 	}
 
+}
+
+func TestShuffleQuizStore(t *testing.T) {
+	data := [][]string{
+		{"1question", "1answer"},
+		{"2question", "2answer"},
+		{"3question", "3answer"},
+		{"4question", "4answer"},
+		{"5question", "5answer"},
+		{"6question", "6answer"},
+		{"7question", "7answer"},
+		{"8question", "8answer"},
+		{"9question", "9answer"},
+		{"10question", "10answer"},
+	}
+	questions := quiz.SliceQuizStore{Data: data}
+	origin := make([][]string, len(data))
+	copy(origin, data)
+	questions.Shuffle()
+	shuffled := questions.Data
+	if reflect.DeepEqual(shuffled, origin) {
+		t.Errorf("quiz data has same order after shuffilling\n")
+	}
 }
 
 func TestGetAnswerFromSliceAnswerStore(t *testing.T) {
