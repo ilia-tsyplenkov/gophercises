@@ -75,8 +75,11 @@ func TestGameQuizQuestionsCorrectAnswers(t *testing.T) {
 func TestQuizGameTimeIsUp(t *testing.T) {
 	gameTimeout := 10 * time.Millisecond
 	quizStore := &quiz.SliceQuizStore{Data: [][]string{{"10 + 10", "20"}}}
-	answerStore := &quiz.SliceDelayedAnswerStore{Store: quiz.SliceAnswerStore{Data: []string{"20"}}, Delay: 2 * gameTimeout}
-	game := QuizGame{quizStore, answerStore, nil, nil, gameTimeout}
+	answerStore := &quiz.SliceDelayedAnswerStore{SliceAnswerStore: quiz.SliceAnswerStore{Data: []string{"20"}}, Delay: 2 * gameTimeout}
+	game := QuizGame{
+		QuizReader:   quizStore,
+		AnswerReader: answerStore,
+		timeout:      gameTimeout}
 	_, answered := game.CheckAnswers()
 
 	want := 0

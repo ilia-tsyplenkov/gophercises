@@ -21,10 +21,14 @@ type QuizGame struct {
 	out io.Writer
 	// Stop quiz timeout
 	timeout time.Duration
+	shuffle bool
 }
 
 func (g *QuizGame) CheckAnswers() (total, correct int) {
 	total = g.Total()
+	if g.shuffle {
+		g.QuizReader.Shuffle()
+	}
 	var stop <-chan time.Time
 	if g.timeout > 0 {
 		stop = time.After(g.timeout)

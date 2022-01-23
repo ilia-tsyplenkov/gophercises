@@ -12,10 +12,12 @@ import (
 
 var quizFile string
 var timeout time.Duration
+var shuffle bool
 
 func init() {
 	flag.StringVar(&quizFile, "quiz", "problems.csv", "csv file with question and correct answers")
 	flag.DurationVar(&timeout, "timeout", 30*time.Second, "quiz timeout")
+	flag.BoolVar(&shuffle, "shuffle", false, "shuffle quiz questions")
 }
 
 func main() {
@@ -35,6 +37,7 @@ func main() {
 		in:           os.Stdin,
 		out:          os.Stdout,
 		timeout:      timeout,
+		shuffle:      shuffle,
 	}
 	game.greeting()
 	game.waitUserReadiness()
