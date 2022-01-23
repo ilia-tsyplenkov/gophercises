@@ -148,7 +148,7 @@ func TestGameNoUserReadinessProvided(t *testing.T) {
 	game.waitUserReadiness()
 }
 
-func TestCorrectIt(t *testing.T) {
+func TestcorrectIt(t *testing.T) {
 	testCases := []struct {
 		initial string
 		want    string
@@ -160,7 +160,7 @@ func TestCorrectIt(t *testing.T) {
 		{"\nLineFeed\n", "linefeed"},
 	}
 	for _, tc := range testCases {
-		got := CorrectIt(tc.initial)
+		got := correctIt(tc.initial)
 		want := tc.want
 		if got != want {
 			t.Errorf("expected to have %q after correction of %q but got %q\n", want, tc.initial, got)

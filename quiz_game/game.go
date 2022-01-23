@@ -58,7 +58,7 @@ func (g *QuizGame) checkAnswers() (total, correct int) {
 			if userAnswer.Err != nil {
 				return
 			}
-			if CorrectIt(question.Answer) == CorrectIt(userAnswer.Value) {
+			if correctIt(question.Answer) == correctIt(userAnswer.Value) {
 				correct++
 			}
 		}
@@ -88,7 +88,7 @@ func (g *QuizGame) Start() (total, correct int) {
 	return g.checkAnswers()
 }
 
-func CorrectIt(s string) string {
+func correctIt(s string) string {
 	s = strings.Trim(s, " \n\t")
 	return strings.ToLower(s)
 }
