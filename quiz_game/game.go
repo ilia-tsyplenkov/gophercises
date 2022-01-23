@@ -24,7 +24,7 @@ type QuizGame struct {
 	shuffle bool
 }
 
-func (g *QuizGame) CheckAnswers() (total, correct int) {
+func (g *QuizGame) checkAnswers() (total, correct int) {
 	total = g.Total()
 	if g.shuffle {
 		g.QuizReader.Shuffle()
@@ -80,6 +80,12 @@ func (g *QuizGame) waitUserReadiness() {
 			break
 		}
 	}
+}
+
+func (g *QuizGame) Start() (total, correct int) {
+	g.greeting()
+	g.waitUserReadiness()
+	return g.checkAnswers()
 }
 
 func CorrectIt(s string) string {

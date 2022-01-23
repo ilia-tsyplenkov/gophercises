@@ -61,7 +61,7 @@ func TestGameQuizQuestionsCorrectAnswers(t *testing.T) {
 			quizStore := &quiz.SliceQuizStore{Data: tc.quizData}
 			answerStore := &quiz.SliceAnswerStore{Data: tc.userAnswers}
 			game := QuizGame{QuizReader: quizStore, AnswerReader: answerStore, out: nil, timeout: 0, in: nil}
-			total, correct := game.CheckAnswers()
+			total, correct := game.checkAnswers()
 			if total != tc.total {
 				t.Fatalf("expected to have %d total answered questions, but got %d\n", tc.total, total)
 			}
@@ -80,7 +80,7 @@ func TestQuizGameTimeIsUp(t *testing.T) {
 		QuizReader:   quizStore,
 		AnswerReader: answerStore,
 		timeout:      gameTimeout}
-	_, answered := game.CheckAnswers()
+	_, answered := game.checkAnswers()
 
 	want := 0
 	if answered != want {

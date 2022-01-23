@@ -39,8 +39,7 @@ func main() {
 		timeout:      timeout,
 		shuffle:      shuffle,
 	}
-	game.greeting()
-	game.waitUserReadiness()
-	totalAnswers, correctAnswers := game.CheckAnswers()
+
+	totalAnswers, correctAnswers := game.Start()
 	fmt.Printf("\nQuiz results: total - %d, correct - %d\n", totalAnswers, correctAnswers)
 }
