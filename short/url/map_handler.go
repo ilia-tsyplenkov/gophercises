@@ -1,9 +1,19 @@
 package url
 
-import "net/http"
+import (
+	"net/http"
+)
 
-type RedirectHandler struct{}
+type RedirectHandler struct {
+	Redirects map[string]string
+}
 
 func (h RedirectHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "http://google.com", http.StatusFound)
+	for key, value := range h.Redirects {
+		if key == r.URL.Path {
+			http.Redirect(w, r, value, http.StatusFound)
+			return
+
+		}
+	}
 }
