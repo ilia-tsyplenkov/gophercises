@@ -1,11 +1,11 @@
-package url_test
+package short_test
 
 import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/ilia-tsyplenkov/gophercises/short/url"
+	url "github.com/ilia-tsyplenkov/gophercises/urlshort"
 )
 
 func TestRedirectHandlerLocation(t *testing.T) {

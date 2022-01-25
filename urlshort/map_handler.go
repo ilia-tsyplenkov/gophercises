@@ -1,4 +1,4 @@
-package url
+package short
 
 import (
 	"net/http"
