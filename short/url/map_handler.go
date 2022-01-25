@@ -5,5 +5,5 @@ import "net/http"
 type RedirectHandler struct{}
 
 func (h RedirectHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	return
+	http.Redirect(w, r, "http://google.com", http.StatusFound)
 }
