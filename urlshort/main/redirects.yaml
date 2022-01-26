@@ -1,0 +1,4 @@
+- from: /python
+  to: https://python.org
+- from: /go
+  to: https://golang.org
