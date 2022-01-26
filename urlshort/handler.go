@@ -22,17 +22,17 @@ func (h RedirectHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.fallback.ServeHTTP(w, r)
 }
 
-func MapHandler(redirects map[string]string, fallback http.Handler) RedirectHandler {
+func MapHandler(redirects map[string]string, fallback http.Handler) http.Handler {
 	return RedirectHandler{redirects, fallback}
 }
 
-func YAMLHandler(yaml []byte, fallback http.Handler) (RedirectHandler, error) {
+func YAMLHandler(yaml []byte, fallback http.Handler) (http.Handler, error) {
 	parsedYaml, err := parseYAML(yaml)
 	if err != nil {
 		return RedirectHandler{}, nil
 	}
 	pathMap := buildMap(parsedYaml)
-	return RedirectHandler{pathMap, fallback}, nil
+	return MapHandler(pathMap, fallback), nil
 }
 
 type redirect struct {
