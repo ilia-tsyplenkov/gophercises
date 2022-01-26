@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	url "github.com/ilia-tsyplenkov/gophercises/urlshort"
+	"github.com/ilia-tsyplenkov/gophercises/urlshort"
 )
 
 var fallbackHandlerBody string = "fallback handler called"
@@ -21,7 +21,7 @@ func TestHandlerRedirectRequests(t *testing.T) {
 		"/net/http": "https://pkg.go.dev/net/http",
 	}
 
-	handler := url.MapHandler(testCases, nil)
+	handler := urlshort.MapHandler(testCases, nil)
 	for from, to := range testCases {
 		testName := fmt.Sprintf("RedirectFrom_%s", from)
 		t.Run(testName, func(t *testing.T) {
@@ -51,7 +51,7 @@ func TestHandlerRedirectRequests(t *testing.T) {
 
 func TestFallbackCalledNonRedirectRequests(t *testing.T) {
 	fallbackHandler := http.HandlerFunc(testFallbackHandler)
-	handler := url.MapHandler(nil, fallbackHandler)
+	handler := urlshort.MapHandler(nil, fallbackHandler)
 	r := httptest.NewRequest("GET", "/", nil)
 	w := httptest.NewRecorder()
 	handler.ServeHTTP(w, r)
