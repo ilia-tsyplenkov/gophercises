@@ -2,6 +2,8 @@ package urlshort
 
 import (
 	"net/http"
+
+	"gopkg.in/yaml.v2"
 )
 
 type RedirectHandler struct {
@@ -39,7 +41,8 @@ func buildMap(d []redirect) map[string]string {
 
 }
 
-func parseYAML(yaml []byte) ([]redirect, error) {
+func parseYAML(yamlBinary []byte) ([]redirect, error) {
 	res := make([]redirect, 0)
-	return res, nil
+	err := yaml.Unmarshal(yamlBinary, &res)
+	return res, err
 }
