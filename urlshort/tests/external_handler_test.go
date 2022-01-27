@@ -95,7 +95,7 @@ func TestJsonHandlerRedirectRequests(t *testing.T) {
 		t.Fatalf("error marshaling: %s\n", err)
 	}
 
-	handler, err := urlshort.JSONHandler(yamlBinary, nil)
+	handler, err := urlshort.JSONHandler(jsonBinary, nil)
 	if err != nil {
 		t.Fatalf("error creating handler: %s\n", err)
 	}

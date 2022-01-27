@@ -1,6 +1,7 @@
 package urlshort
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"os"
 	"reflect"
@@ -48,20 +49,38 @@ func TestBuildingMap(t *testing.T) {
 	}
 }
 
-func TestParseYAML(t *testing.T) {
+func TestParser(t *testing.T) {
 	originData := []redirect{
 		{"/python", "https://python.org"},
 		{"/go", "https://golang.org"},
 	}
 
-	yamlData, err := yaml.Marshal(originData)
-	if err != nil {
-		t.Fatalf("error yaml marhaling: %s\n", err)
+	testCases := []struct {
+		Name        string
+		MarshalFunc func(interface{}) ([]byte, error)
+		ParseFunc   func([]byte) ([]redirect, error)
+	}{
+		{"YAML", yaml.Marshal, parseYAML},
+		{"JSON", json.Marshal, parseJSON},
 	}
-	got, err := parseYAML(yamlData)
-	want := originData
-	if !reflect.DeepEqual(got, want) {
-		t.Fatalf("exptected to have %q after parsing but got %q\n", want, got)
+
+	for _, tc := range testCases {
+		testName := "parse" + tc.Name
+		t.Run(testName, func(t *testing.T) {
+			data, err := tc.MarshalFunc(originData)
+			if err != nil {
+				t.Fatalf("error yaml marhaling: %s\n", err)
+			}
+
+			got, err := tc.ParseFunc(data)
+			if err != nil {
+				t.Fatalf("error parsing data: %s\n", err)
+			}
+			want := originData
+			if !reflect.DeepEqual(got, want) {
+				t.Fatalf("exptected to have %q after parsing but got %q\n", want, got)
+			}
+		})
 	}
 
 }

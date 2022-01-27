@@ -1,6 +1,7 @@
 package urlshort
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"gopkg.in/yaml.v2"
@@ -35,6 +36,15 @@ func YAMLHandler(yaml []byte, fallback http.Handler) (http.Handler, error) {
 	return MapHandler(pathMap, fallback), nil
 }
 
+func JSONHandler(json []byte, fallback http.Handler) (http.Handler, error) {
+	parsedJson, err := parseJSON(json)
+	if err != nil {
+		return RedirectHandler{}, err
+	}
+	pathMap := buildMap(parsedJson)
+	return MapHandler(pathMap, fallback), nil
+}
+
 type redirect struct {
 	From string
 	To   string
@@ -53,5 +63,11 @@ func buildMap(d []redirect) map[string]string {
 func parseYAML(yamlBinary []byte) ([]redirect, error) {
 	res := make([]redirect, 0)
 	err := yaml.Unmarshal(yamlBinary, &res)
+	return res, err
+}
+
+func parseJSON(binary []byte) ([]redirect, error) {
+	res := make([]redirect, 0)
+	err := json.Unmarshal(binary, &res)
 	return res, err
 }
