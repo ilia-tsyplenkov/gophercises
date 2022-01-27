@@ -49,31 +49,16 @@ func TestBuildingMap(t *testing.T) {
 }
 
 func TestParseYAML(t *testing.T) {
-	testFile := "parseYAML.yaml"
 	originData := []redirect{
 		{"/python", "https://python.org"},
 		{"/go", "https://golang.org"},
 	}
 
-	err := createYamlFile(testFile, originData)
+	yamlData, err := yaml.Marshal(originData)
 	if err != nil {
-		t.Fatalf(err.Error())
+		t.Fatalf("error yaml marhaling: %s\n", err)
 	}
-
-	f, err := os.Open(testFile)
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-	defer func() {
-		f.Close()
-		os.Remove(testFile)
-	}()
-	fileData, err := ioutil.ReadAll(f)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	got, err := parseYAML(fileData)
+	got, err := parseYAML(yamlData)
 	want := originData
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("exptected to have %q after parsing but got %q\n", want, got)

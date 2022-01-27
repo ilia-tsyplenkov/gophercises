@@ -29,7 +29,7 @@ func MapHandler(redirects map[string]string, fallback http.Handler) http.Handler
 func YAMLHandler(yaml []byte, fallback http.Handler) (http.Handler, error) {
 	parsedYaml, err := parseYAML(yaml)
 	if err != nil {
-		return RedirectHandler{}, nil
+		return RedirectHandler{}, err
 	}
 	pathMap := buildMap(parsedYaml)
 	return MapHandler(pathMap, fallback), nil
