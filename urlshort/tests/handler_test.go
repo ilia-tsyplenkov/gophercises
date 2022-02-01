@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 
 	"github.com/ilia-tsyplenkov/gophercises/urlshort"
+	"github.com/ilia-tsyplenkov/gophercises/urlshort/test_sugar"
 	"gopkg.in/yaml.v2"
 )
 
@@ -108,23 +110,26 @@ func TestJsonHandlerRedirectRequests(t *testing.T) {
 
 func TestBoltDbHandlerRedirectRequests(t *testing.T) {
 
-	testCases := []struct {
-		From string
-		To   string
-	}{
-		{"/google", "https://google.com"},
-		{"/yandex", "https://yandex.com"},
-		{"/youtube", "https://youtube.com"},
-		{"/net/http", "https://pkg.go.dev/net/http"},
+	testCases := map[string]string{
+		"/google":   "https://google.com",
+		"/yandex":   "https://yandex.com",
+		"/youtube":  "https://youtube.com",
+		"/net/http": "https://pkg.go.dev/net/http",
 	}
 
 	dbFile := "test.db"
+	bucket := "redirects"
+	err := test_sugar.FillBucket(dbFile, bucket, testCases)
+	if err != nil {
+		t.Fatalf("error preparing test bucket - %q", err)
+	}
+	defer os.Remove(dbFile)
 	handler, err := urlshort.BoltDbHandler(dbFile, fallbackHandler)
 	if err != nil {
 		t.Fatalf("error creating handler: %s\n", err)
 	}
-	for _, tc := range testCases {
-		performRedirect(t, handler, tc.From, tc.To)
+	for from, to := range testCases {
+		performRedirect(t, handler, from, to)
 
 	}
 

@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/ilia-tsyplenkov/gophercises/urlshort/test_sugar"
 	"gopkg.in/yaml.v2"
 )
 
@@ -86,12 +87,25 @@ func TestParser(t *testing.T) {
 }
 
 func TestReadDb(t *testing.T) {
-	pathMap, err := readDb("test.db", "redirects")
+	testFile := "test.db"
+	testBucket := "redirects"
+	want := map[string]string{
+		"/google":   "https://google.com",
+		"/yandex":   "https://yandex.com",
+		"/youtube":  "https://youtube.com",
+		"/net/http": "https://pkg.go.dev/net/http",
+	}
+	err := test_sugar.FillBucket(testFile, testBucket, want)
+	if err != nil {
+		t.Fatalf("error preparing test bucket - %q", err)
+	}
+	defer os.Remove(testFile)
+	got, err := readDb(testFile, testBucket)
 	if err != nil {
 		t.Fatalf("expected to have success read from db, but got %q\n", err)
 	}
-	if len(pathMap) == 0 {
-		t.Fatal("expected to read non 0 record from db.")
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("expected read result:\n%q\nbut got:\n%q", want, got)
 	}
 
 }

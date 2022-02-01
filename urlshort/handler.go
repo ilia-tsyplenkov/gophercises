@@ -48,8 +48,11 @@ func JSONHandler(json []byte, fallback http.Handler) (http.Handler, error) {
 }
 
 func BoltDbHandler(dbFile string, fallback http.Handler) (http.Handler, error) {
-	res := make(map[string]string)
-	return MapHandler(res, fallback), nil
+	buildMap, err := readDb(dbFile, "redirects")
+	if err != nil {
+		return RedirectHandler{}, err
+	}
+	return MapHandler(buildMap, fallback), nil
 }
 
 type redirect struct {
