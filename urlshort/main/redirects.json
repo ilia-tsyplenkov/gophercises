@@ -1,0 +1,6 @@
+[
+    {"From":"/google","To":"https://google.com"},
+    {"From":"/yandex","To":"https://yandex.com"},
+    {"From":"/youtube","To":"https://youtube.com"},
+    {"From":"/net/http","To":"https://pkg.go.dev/net/http"}
+]

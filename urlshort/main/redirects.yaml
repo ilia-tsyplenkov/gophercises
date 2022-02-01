@@ -1,4 +1,8 @@
-- from: /python
-  to: https://python.org
-- from: /go
-  to: https://golang.org
+- from: /google
+  to: https://google.com
+- from: /yandex
+  to: https://yandex.com
+- from: /youtube
+  to: https://youtube.com
+- from: /net/http
+  to: https://pkg.go.dev/net/http

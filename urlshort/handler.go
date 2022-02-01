@@ -1,8 +1,11 @@
 package urlshort
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 
+	"github.com/boltdb/bolt"
 	"gopkg.in/yaml.v2"
 )
 
@@ -29,10 +32,27 @@ func MapHandler(redirects map[string]string, fallback http.Handler) http.Handler
 func YAMLHandler(yaml []byte, fallback http.Handler) (http.Handler, error) {
 	parsedYaml, err := parseYAML(yaml)
 	if err != nil {
-		return RedirectHandler{}, nil
+		return RedirectHandler{}, err
 	}
 	pathMap := buildMap(parsedYaml)
 	return MapHandler(pathMap, fallback), nil
+}
+
+func JSONHandler(json []byte, fallback http.Handler) (http.Handler, error) {
+	parsedJson, err := parseJSON(json)
+	if err != nil {
+		return RedirectHandler{}, err
+	}
+	pathMap := buildMap(parsedJson)
+	return MapHandler(pathMap, fallback), nil
+}
+
+func BoltDbHandler(dbFile string, fallback http.Handler) (http.Handler, error) {
+	buildMap, err := readDb(dbFile, "redirects")
+	if err != nil {
+		return RedirectHandler{}, err
+	}
+	return MapHandler(buildMap, fallback), nil
 }
 
 type redirect struct {
@@ -54,4 +74,38 @@ func parseYAML(yamlBinary []byte) ([]redirect, error) {
 	res := make([]redirect, 0)
 	err := yaml.Unmarshal(yamlBinary, &res)
 	return res, err
+}
+
+func parseJSON(binary []byte) ([]redirect, error) {
+	res := make([]redirect, 0)
+	err := json.Unmarshal(binary, &res)
+	return res, err
+}
+
+func readDb(dbFile, bucketName string) (map[string]string, error) {
+	db, err := bolt.Open(dbFile, 0600, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	defer db.Close()
+	res := make(map[string]string)
+	err = db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(bucketName))
+		if b == nil {
+			return fmt.Errorf("%s bucket wasn't found.", bucketName)
+		}
+		c := b.Cursor()
+		for k, v := c.First(); k != nil; k, v = c.Next() {
+			res[string(k)] = string(v)
+
+		}
+		return nil
+
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
