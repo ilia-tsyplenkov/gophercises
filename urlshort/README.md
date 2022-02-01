@@ -23,3 +23,11 @@ func YAMLHandler(yaml []byte, fallback http.Handler) (http.Handler, error) {
 ```
 
 But in order for this to work you will need to create functions like `parseYAML` and `buildMap` on your own. This should give you ample experience working with YAML data.
+
+## Bonus
+
+As a bonus exercises you can also...
+
+1. Update main/main.go source file to accept a YAML file as a flag and then load the YAML from a file rather than from a string.
+2. Build a JSONHandler that serves the same purpose, but reads from JSON data.
+3. Build a Handler that doesn't read from a map but instead reads from a database. Whether you use BoltDB, SQL, or something else is entirely up to you.
