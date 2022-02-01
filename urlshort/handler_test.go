@@ -85,6 +85,17 @@ func TestParser(t *testing.T) {
 
 }
 
+func TestReadDb(t *testing.T) {
+	pathMap, err := readDb("test.db", "redirects")
+	if err != nil {
+		t.Fatalf("expected to have success read from db, but got %q\n", err)
+	}
+	if len(pathMap) == 0 {
+		t.Fatal("expected to read non 0 record from db.")
+	}
+
+}
+
 func createYamlFile(fileName string, data interface{}) error {
 	binaryData, err := yaml.Marshal(data)
 	if err != nil {

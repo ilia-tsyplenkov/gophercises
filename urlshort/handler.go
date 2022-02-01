@@ -2,8 +2,10 @@ package urlshort
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
+	"github.com/boltdb/bolt"
 	"gopkg.in/yaml.v2"
 )
 
@@ -45,6 +47,11 @@ func JSONHandler(json []byte, fallback http.Handler) (http.Handler, error) {
 	return MapHandler(pathMap, fallback), nil
 }
 
+func BoltDbHandler(dbFile string, fallback http.Handler) (http.Handler, error) {
+	res := make(map[string]string)
+	return MapHandler(res, fallback), nil
+}
+
 type redirect struct {
 	From string
 	To   string
@@ -70,4 +77,32 @@ func parseJSON(binary []byte) ([]redirect, error) {
 	res := make([]redirect, 0)
 	err := json.Unmarshal(binary, &res)
 	return res, err
+}
+
+func readDb(dbFile, bucketName string) (map[string]string, error) {
+	db, err := bolt.Open(dbFile, 0600, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	defer db.Close()
+	res := make(map[string]string)
+	err = db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(bucketName))
+		if b == nil {
+			return fmt.Errorf("%s bucket wasn't found.", bucketName)
+		}
+		c := b.Cursor()
+		for k, v := c.First(); k != nil; k, v = c.Next() {
+			res[string(k)] = string(v)
+
+		}
+		return nil
+
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }

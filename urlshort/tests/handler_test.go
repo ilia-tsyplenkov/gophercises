@@ -13,6 +13,7 @@ import (
 )
 
 var fallbackHandlerBody string = "fallback handler called"
+var fallbackHandler = http.HandlerFunc(testFallbackHandler)
 
 func TestHandlerRedirectRequests(t *testing.T) {
 
@@ -32,7 +33,6 @@ func TestHandlerRedirectRequests(t *testing.T) {
 }
 
 func TestFallbackCalledNonRedirectRequests(t *testing.T) {
-	fallbackHandler := http.HandlerFunc(testFallbackHandler)
 	handler := urlshort.MapHandler(nil, fallbackHandler)
 	r := httptest.NewRequest("GET", "/", nil)
 	w := httptest.NewRecorder()
@@ -105,6 +105,31 @@ func TestJsonHandlerRedirectRequests(t *testing.T) {
 	}
 
 }
+
+func TestBoltDbHandlerRedirectRequests(t *testing.T) {
+
+	testCases := []struct {
+		From string
+		To   string
+	}{
+		{"/google", "https://google.com"},
+		{"/yandex", "https://yandex.com"},
+		{"/youtube", "https://youtube.com"},
+		{"/net/http", "https://pkg.go.dev/net/http"},
+	}
+
+	dbFile := "test.db"
+	handler, err := urlshort.BoltDbHandler(dbFile, fallbackHandler)
+	if err != nil {
+		t.Fatalf("error creating handler: %s\n", err)
+	}
+	for _, tc := range testCases {
+		performRedirect(t, handler, tc.From, tc.To)
+
+	}
+
+}
+
 func testFallbackHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, fallbackHandlerBody)
 }
@@ -117,7 +142,7 @@ func performRedirect(t *testing.T, handler http.Handler, from, to string) {
 		handler.ServeHTTP(w, r)
 
 		if w.Code != http.StatusFound {
-			t.Fatalf("expected %d code but got %d\n", w.Code, http.StatusFound)
+			t.Fatalf("expected %d code but got %d\n", http.StatusFound, w.Code)
 		}
 		location := w.HeaderMap["Location"]
 		if len(location) == 0 {
