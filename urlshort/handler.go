@@ -3,6 +3,7 @@ package urlshort
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/boltdb/bolt"
@@ -15,6 +16,7 @@ type RedirectHandler struct {
 }
 
 func (h RedirectHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	log.Println("redirect rules: ", h.redirects)
 	for key, value := range h.redirects {
 		if key == r.URL.Path {
 			http.Redirect(w, r, value, http.StatusFound)
