@@ -1,6 +1,6 @@
 package test_sugar
 
-import "github.com/boltdb/bolt"
+import bolt "go.etcd.io/bbolt"
 
 func FillBucket(dbFile, bucketName string, data map[string]string) error {
 	db, err := bolt.Open(dbFile, 0600, nil)

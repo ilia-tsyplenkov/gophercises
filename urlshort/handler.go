@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/boltdb/bolt"
+	bolt "go.etcd.io/bbolt"
 	"gopkg.in/yaml.v2"
 )
 
