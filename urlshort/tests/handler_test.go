@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/ilia-tsyplenkov/gophercises/urlshort"
 	"github.com/ilia-tsyplenkov/gophercises/urlshort/test_sugar"
@@ -156,12 +157,12 @@ func TestBoltDbHandlerUpToDateRedirects(t *testing.T) {
 		t.Fatalf("error creating handler: %s\n", err)
 	}
 
-	// testCases["/go"] = "https://go.dev"
-	// err = test_sugar.FillBucket(dbFile, bucket, testCases)
-	// if err != nil {
-	// 	t.Fatalf("error updating test bucket - %q", err)
-	// }
-	// time.Sleep(2 * time.Second)
+	testCases["/go"] = "https://go.dev"
+	err = test_sugar.FillBucket(dbFile, bucket, testCases)
+	if err != nil {
+		t.Fatalf("error updating test bucket - %q", err)
+	}
+	time.Sleep(2 * time.Second)
 	for from, to := range testCases {
 		performRedirect(t, handler, from, to)
 
