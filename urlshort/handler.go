@@ -3,7 +3,6 @@ package urlshort
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
@@ -65,7 +64,6 @@ func BoltDbHandler(dbFile string, fallback http.Handler, fetchInterval time.Dura
 				return
 			default:
 				redirects, _ := readDb(dbFile, "redirects")
-				log.Println("fetched redirects from goroutine:", redirects)
 				hd.redirects = redirects
 			}
 		}

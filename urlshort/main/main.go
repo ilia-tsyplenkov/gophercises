@@ -23,11 +23,13 @@ const (
 	yamlType      = "yaml"
 	jsonType      = "json"
 	fetchInterval = 30 * time.Second
+	addr          = ":8080"
 )
 
 func init() {
 	flag.StringVar(&roadFile, "src", "redirects.yaml", "source file with redirect rules")
 }
+
 func main() {
 	var done chan struct{}
 	flag.Parse()
@@ -69,6 +71,6 @@ func main() {
 		log.Fatalf("error creating handler: %s\n", err)
 	}
 	http.Handle("/", handler)
-	log.Println("Server is starting on :8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Println("Server is starting on", addr)
+	log.Fatal(http.ListenAndServe(addr, nil))
 }
