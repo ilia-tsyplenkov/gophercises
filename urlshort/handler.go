@@ -47,7 +47,7 @@ func JSONHandler(json []byte, fallback http.Handler) (http.Handler, error) {
 	return MapHandler(pathMap, fallback), nil
 }
 
-func BoltDbHandler(dbFile string, fallback http.Handler) (http.Handler, error) {
+func BoltDbHandler(dbFile string, fallback http.Handler, fetchInterval time.Duration, done <-chan struct{}) (http.Handler, error) {
 	buildMap, err := readDb(dbFile, "redirects")
 	if err != nil {
 		return nil, err
@@ -58,10 +58,17 @@ func BoltDbHandler(dbFile string, fallback http.Handler) (http.Handler, error) {
 		return handler, nil
 	}
 	go func() {
-		time.Sleep(1 * time.Second)
-		redirects, _ := readDb(dbFile, "redirects")
-		log.Println("fetched redirects from goroutine:", redirects)
-		hd.redirects = redirects
+		for {
+			time.Sleep(fetchInterval)
+			select {
+			case <-done:
+				return
+			default:
+				redirects, _ := readDb(dbFile, "redirects")
+				log.Println("fetched redirects from goroutine:", redirects)
+				hd.redirects = redirects
+			}
+		}
 	}()
 	return hd, nil
 }

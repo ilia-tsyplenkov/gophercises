@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/ilia-tsyplenkov/gophercises/urlshort"
 )
@@ -19,14 +20,16 @@ var defaultHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Reques
 })
 
 const (
-	yamlType = "yaml"
-	jsonType = "json"
+	yamlType      = "yaml"
+	jsonType      = "json"
+	fetchInterval = 30 * time.Second
 )
 
 func init() {
 	flag.StringVar(&roadFile, "src", "redirects.yaml", "source file with redirect rules")
 }
 func main() {
+	var done chan struct{}
 	flag.Parse()
 	s := strings.Split(roadFile, ".")
 	fileType := s[len(s)-1]
@@ -56,7 +59,11 @@ func main() {
 		log.Println("creating json handler")
 		handler, err = urlshort.JSONHandler(binaryData, defaultHandler)
 	default:
-		handler, err = urlshort.BoltDbHandler(roadFile, defaultHandler)
+		done = make(chan struct{})
+		handler, err = urlshort.BoltDbHandler(roadFile, defaultHandler, fetchInterval, done)
+		defer func() {
+			done <- struct{}{}
+		}()
 	}
 	if err != nil {
 		log.Fatalf("error creating handler: %s\n", err)
