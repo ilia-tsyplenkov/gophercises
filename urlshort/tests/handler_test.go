@@ -135,6 +135,39 @@ func TestBoltDbHandlerRedirectRequests(t *testing.T) {
 
 }
 
+func TestBoltDbHandlerUpToDateRedirects(t *testing.T) {
+
+	testCases := map[string]string{
+		"/google":   "https://google.com",
+		"/yandex":   "https://yandex.com",
+		"/youtube":  "https://youtube.com",
+		"/net/http": "https://pkg.go.dev/net/http",
+	}
+
+	dbFile := "test.db"
+	bucket := "redirects"
+	err := test_sugar.FillBucket(dbFile, bucket, testCases)
+	if err != nil {
+		t.Fatalf("error preparing test bucket - %q", err)
+	}
+	defer os.Remove(dbFile)
+	handler, err := urlshort.BoltDbHandler(dbFile, fallbackHandler)
+	if err != nil {
+		t.Fatalf("error creating handler: %s\n", err)
+	}
+
+	// testCases["/go"] = "https://go.dev"
+	// err = test_sugar.FillBucket(dbFile, bucket, testCases)
+	// if err != nil {
+	// 	t.Fatalf("error updating test bucket - %q", err)
+	// }
+	// time.Sleep(2 * time.Second)
+	for from, to := range testCases {
+		performRedirect(t, handler, from, to)
+
+	}
+
+}
 func testFallbackHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, fallbackHandlerBody)
 }
