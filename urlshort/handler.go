@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	bolt "go.etcd.io/bbolt"
 	"gopkg.in/yaml.v2"
@@ -14,7 +15,7 @@ type RedirectHandler struct {
 	fallback  http.Handler
 }
 
-func (h RedirectHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *RedirectHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	value, ok := h.redirects[r.URL.Path]
 	if ok {
 		http.Redirect(w, r, value, http.StatusFound)
@@ -24,13 +25,13 @@ func (h RedirectHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func MapHandler(redirects map[string]string, fallback http.Handler) http.Handler {
-	return RedirectHandler{redirects, fallback}
+	return &RedirectHandler{redirects, fallback}
 }
 
 func YAMLHandler(yaml []byte, fallback http.Handler) (http.Handler, error) {
 	parsedYaml, err := parseYAML(yaml)
 	if err != nil {
-		return RedirectHandler{}, err
+		return nil, err
 	}
 	pathMap := buildMap(parsedYaml)
 	return MapHandler(pathMap, fallback), nil
@@ -39,18 +40,35 @@ func YAMLHandler(yaml []byte, fallback http.Handler) (http.Handler, error) {
 func JSONHandler(json []byte, fallback http.Handler) (http.Handler, error) {
 	parsedJson, err := parseJSON(json)
 	if err != nil {
-		return RedirectHandler{}, err
+		return nil, err
 	}
 	pathMap := buildMap(parsedJson)
 	return MapHandler(pathMap, fallback), nil
 }
 
-func BoltDbHandler(dbFile string, fallback http.Handler) (http.Handler, error) {
+func BoltDbHandler(dbFile string, fallback http.Handler, fetchInterval time.Duration, done <-chan struct{}) (http.Handler, error) {
 	buildMap, err := readDb(dbFile, "redirects")
 	if err != nil {
-		return RedirectHandler{}, err
+		return nil, err
 	}
-	return MapHandler(buildMap, fallback), nil
+	handler := MapHandler(buildMap, fallback)
+	hd, ok := handler.(*RedirectHandler)
+	if !ok {
+		return handler, nil
+	}
+	go func() {
+		for {
+			time.Sleep(fetchInterval)
+			select {
+			case <-done:
+				return
+			default:
+				redirects, _ := readDb(dbFile, "redirects")
+				hd.redirects = redirects
+			}
+		}
+	}()
+	return hd, nil
 }
 
 type redirect struct {

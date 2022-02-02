@@ -8,14 +8,22 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/ilia-tsyplenkov/gophercises/urlshort"
 	"github.com/ilia-tsyplenkov/gophercises/urlshort/test_sugar"
 	"gopkg.in/yaml.v2"
 )
 
-var fallbackHandlerBody string = "fallback handler called"
 var fallbackHandler = http.HandlerFunc(testFallbackHandler)
+var doneCh = make(chan struct{})
+
+const (
+	dbFile              = "test.db"
+	bucket              = "redirects"
+	interval            = 10 * time.Millisecond
+	fallbackHandlerBody = "fallback handler called"
+)
 
 func TestHandlerRedirectRequests(t *testing.T) {
 
@@ -117,17 +125,18 @@ func TestBoltDbHandlerRedirectRequests(t *testing.T) {
 		"/net/http": "https://pkg.go.dev/net/http",
 	}
 
-	dbFile := "test.db"
-	bucket := "redirects"
 	err := test_sugar.FillBucket(dbFile, bucket, testCases)
 	if err != nil {
 		t.Fatalf("error preparing test bucket - %q", err)
 	}
 	defer os.Remove(dbFile)
-	handler, err := urlshort.BoltDbHandler(dbFile, fallbackHandler)
+	handler, err := urlshort.BoltDbHandler(dbFile, fallbackHandler, interval, doneCh)
 	if err != nil {
 		t.Fatalf("error creating handler: %s\n", err)
 	}
+	defer func() {
+		doneCh <- struct{}{}
+	}()
 	for from, to := range testCases {
 		performRedirect(t, handler, from, to)
 
@@ -135,6 +144,40 @@ func TestBoltDbHandlerRedirectRequests(t *testing.T) {
 
 }
 
+func TestBoltDbHandlerUpToDateRedirects(t *testing.T) {
+
+	testCases := map[string]string{
+		"/google":   "https://google.com",
+		"/yandex":   "https://yandex.com",
+		"/youtube":  "https://youtube.com",
+		"/net/http": "https://pkg.go.dev/net/http",
+	}
+
+	err := test_sugar.FillBucket(dbFile, bucket, testCases)
+	if err != nil {
+		t.Fatalf("error preparing test bucket - %q", err)
+	}
+	defer os.Remove(dbFile)
+	handler, err := urlshort.BoltDbHandler(dbFile, fallbackHandler, interval, doneCh)
+	if err != nil {
+		t.Fatalf("error creating handler: %s\n", err)
+	}
+	defer func() {
+		doneCh <- struct{}{}
+	}()
+
+	testCases["/go"] = "https://go.dev"
+	err = test_sugar.FillBucket(dbFile, bucket, testCases)
+	if err != nil {
+		t.Fatalf("error updating test bucket - %q", err)
+	}
+	time.Sleep(10 * interval)
+	for from, to := range testCases {
+		performRedirect(t, handler, from, to)
+
+	}
+
+}
 func testFallbackHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, fallbackHandlerBody)
 }
