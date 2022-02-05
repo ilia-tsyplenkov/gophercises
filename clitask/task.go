@@ -8,10 +8,6 @@ import (
 
 var ErrUnexpectedId = errors.New("task id must be greater than zero.")
 
-func GetTask() string {
-	return "write tests"
-}
-
 type Task struct {
 	name string
 	done bool
@@ -24,6 +20,10 @@ func (t Task) String() string {
 type MemStore struct {
 	todo []Task
 	done []Task
+}
+
+func NewMemStore() *MemStore {
+	return &MemStore{}
 }
 
 func (s *MemStore) AllTasks() []Task {

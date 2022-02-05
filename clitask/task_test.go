@@ -7,14 +7,6 @@ import (
 	"testing"
 )
 
-func TestGetTask(t *testing.T) {
-	want := "write tests"
-	got := GetTask()
-	if got != want {
-		t.Fatalf("expected to have %q task but got %q\n", want, got)
-	}
-}
-
 func TestTaskToDoList(t *testing.T) {
 
 	testCases := []struct {
