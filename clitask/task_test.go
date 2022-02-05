@@ -2,6 +2,7 @@ package clitask
 
 import (
 	"fmt"
+	"io"
 	"reflect"
 	"testing"
 )
@@ -95,14 +96,78 @@ func TestCompletedTaskList(t *testing.T) {
 }
 
 func TestDoTask(t *testing.T) {
-
-	have := []Task{Task{name: "write test", done: false}}
-	store := MemStore{have, nil}
-	store.Do(1)
-	want := []Task{Task{name: "write test", done: true}}
-	got := store.Completed()
-	if !reflect.DeepEqual(got, want) {
-		t.Fatalf("expected to have %v completed tasks but got %v", want, got)
+	testCases := []struct {
+		name string
+		have []Task
+		want []Task
+		toDo int
+		err  error
+	}{
+		{
+			name: "EmptyBacklog",
+			have: nil,
+			want: nil,
+			toDo: 1,
+			err:  io.ErrUnexpectedEOF,
+		},
+		{
+			name: "1TaskInBacklogButId2Requested",
+			have: []Task{Task{name: "write test", done: false}},
+			want: nil,
+			toDo: 2,
+			err:  io.ErrUnexpectedEOF,
+		},
+		{
+			name: "1TaskInBacklogButId0Requested",
+			have: []Task{Task{name: "write test", done: false}},
+			want: nil,
+			toDo: 0,
+			err:  ErrUnexpectedId,
+		},
+		{
+			name: "1TaskId1Requested",
+			have: []Task{Task{name: "write test", done: false}},
+			want: []Task{Task{name: "write test", done: true}},
+			toDo: 1,
+			err:  nil,
+		},
+		{
+			name: "2TasksId1Requested",
+			have: []Task{Task{name: "write test", done: false}, Task{name: "write code", done: false}},
+			want: []Task{Task{name: "write test", done: true}},
+			toDo: 1,
+			err:  nil,
+		},
+		{
+			name: "2TasksId2Requested",
+			have: []Task{Task{name: "write test", done: false}, Task{name: "write code", done: false}},
+			want: []Task{Task{name: "write code", done: true}},
+			toDo: 2,
+			err:  nil,
+		},
 	}
 
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			todoNum := len(tc.have)
+			store := MemStore{todo: tc.have}
+			err := store.Do(tc.toDo)
+			if err != tc.err {
+				t.Fatalf("expected to have %v error but got %v\n", tc.err, err)
+			}
+			got := store.Completed()
+			if !reflect.DeepEqual(got, tc.want) {
+				t.Fatalf("expected to have %v in completed but got %v\n", tc.want, got)
+			}
+			if tc.want != nil {
+				t.Log("Check that ToDo backlog has been reduced.")
+				gotTodoNum := len(store.ToDo())
+				wantTodoNum := todoNum - 1
+				if gotTodoNum != wantTodoNum {
+					t.Fatalf("expected to have %d tasks in backlog but got %d\n", wantTodoNum, gotTodoNum)
+				}
+			}
+
+		})
+	}
 }

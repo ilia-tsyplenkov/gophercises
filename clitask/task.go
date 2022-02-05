@@ -1,6 +1,12 @@
 package clitask
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+	"io"
+)
+
+var ErrUnexpectedId = errors.New("task id must be greater than zero.")
 
 func GetTask() string {
 	return "write tests"
@@ -36,10 +42,17 @@ func (s *MemStore) Completed() []Task {
 	return s.done
 }
 
-func (s *MemStore) Do(id int) {
+func (s *MemStore) Do(id int) error {
+	if id < 1 {
+		return ErrUnexpectedId
+	}
+	if id > len(s.todo) {
+		return io.ErrUnexpectedEOF
+	}
 	id--
 	task := s.todo[id]
 	s.todo = append(s.todo[:id], s.todo[id+1:]...)
 	task.done = true
 	s.done = append(s.done, task)
+	return nil
 }
