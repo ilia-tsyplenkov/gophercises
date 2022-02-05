@@ -3,7 +3,6 @@ package clitask
 import (
 	"bufio"
 	"io"
-	"log"
 	"strings"
 )
 
@@ -20,7 +19,6 @@ func (m *Manager) ReadCmd() (string, error) {
 }
 
 func (m *Manager) isKnown(s string) bool {
-	log.Println("raw s: ", s)
 	s = strings.Trim(s, " ")
 	fixed := ""
 	// remove all unnecessary spaces between words
@@ -39,7 +37,6 @@ func (m *Manager) isKnown(s string) bool {
 		cmd = strings.Join(parts[:2], " ")
 	}
 
-	log.Println("after handling: ", cmd)
 	for _, item := range knownCommand {
 		if cmd == item {
 			return true
