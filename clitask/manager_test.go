@@ -20,19 +20,16 @@ func TestReadCommand(t *testing.T) {
 		},
 
 		{
-			name: "TaskCmd", cmd: "task\n", want: "task\n", err: nil,
+			name: "TaskCmd", cmd: "task\n", want: "task", err: nil,
 		},
 		{
-			name: "TaskListCmd", cmd: "task list\n", want: "task list\n", err: nil,
+			name: "TaskListCmd", cmd: "task list\n", want: "task list", err: nil,
 		},
 		{
-			name: "TaskDoCmd", cmd: "task do 1\n", want: "task do 1\n", err: nil,
+			name: "TaskDoCmd", cmd: "task do 1\n", want: "task do 1", err: nil,
 		},
 		{
-			name: "TaskAddCmd", cmd: "task add foo\n", want: "task add foo\n", err: nil,
-		},
-		{
-			name: "TaskAddCmd", cmd: "task add foo\n", want: "task add foo\n", err: nil,
+			name: "TaskAddCmd", cmd: "task add foo\n", want: "task add foo", err: nil,
 		},
 		{
 			name: "UnknownFooCmd", cmd: "task foo\n", want: "", err: ErrUnknownCmd,
@@ -65,6 +62,29 @@ func TestReadCommand(t *testing.T) {
 	}
 }
 
+func TestFixCommand(t *testing.T) {
+	testCases := []struct {
+		name string
+		cmd  string
+		want string
+	}{
+		{name: "task", cmd: "task", want: "task"},
+		{name: "taskWithNLCharacter", cmd: "task\n", want: "task"},
+		{name: "taskWithSomeSpaces", cmd: "  task  ", want: "task"},
+		{name: "taskDo", cmd: "task do 1", want: "task do 1"},
+		{name: "taskDoWithSpacesBetweenWords", cmd: "task   do  1", want: "task do 1"},
+	}
+	manager := Manager{}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := manager.fixCmd(tc.cmd)
+			if got != tc.want {
+				t.Fatalf("expected to have %q after fix, but got %q\n", tc.want, got)
+			}
+		})
+	}
+
+}
 func TestIsKnownCommand(t *testing.T) {
 	testCases := []struct {
 		name  string
@@ -72,10 +92,7 @@ func TestIsKnownCommand(t *testing.T) {
 		known bool
 	}{
 		{name: "task", cmd: "task", known: true},
-		{name: "taskWithNLCharacter", cmd: "task\n", known: true},
-		{name: "taskWithSomeSpaces", cmd: "  task  ", known: true},
 		{name: "taskDo", cmd: "task do 1", known: true},
-		{name: "taskDoWithSpacesBetweenWords", cmd: "task   do  1", known: true},
 		{name: "taskAdd", cmd: "task add foo", known: true},
 		{name: "taskList", cmd: "task list", known: true},
 		{name: "taskFoo", cmd: "task foo", known: false},

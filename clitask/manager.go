@@ -20,6 +20,7 @@ func (m *Manager) ReadCmd() (string, error) {
 	if err != nil {
 		return "", err
 	}
+	s = m.fixCmd(s)
 	if !m.isKnown(s) {
 		return "", ErrUnknownCmd
 	}
@@ -27,7 +28,7 @@ func (m *Manager) ReadCmd() (string, error) {
 
 }
 
-func (m *Manager) isKnown(s string) bool {
+func (m *Manager) fixCmd(s string) string {
 	s = strings.Trim(s, " \n")
 	fixed := ""
 	// remove all unnecessary spaces between words
@@ -37,9 +38,14 @@ func (m *Manager) isKnown(s string) bool {
 		}
 		fixed = fixed + string(ch)
 	}
+	return fixed
+}
+
+func (m *Manager) isKnown(s string) bool {
+	// s = m.fixCmd(s)
 	var cmd string
 
-	parts := strings.Split(fixed, " ")
+	parts := strings.Split(s, " ")
 	if len(parts) == 1 {
 		cmd = parts[0]
 	} else {
