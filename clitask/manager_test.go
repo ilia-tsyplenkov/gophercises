@@ -1,47 +1,45 @@
 package clitask
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"os"
 	"testing"
 )
 
-var ErrUnknownCmd = errors.New("unsupported command.")
-
 func TestReadCommand(t *testing.T) {
 	file := "testInput"
 	testCases := []struct {
 		name string
 		cmd  string
+		want string
 		err  error
 	}{
 		{
-			name: "EmptyCmd", cmd: "", err: io.EOF,
+			name: "EmptyCmd", cmd: "", want: "", err: io.EOF,
 		},
 
 		{
-			name: "TaskCmd", cmd: "task\n", err: nil,
+			name: "TaskCmd", cmd: "task\n", want: "task\n", err: nil,
 		},
 		{
-			name: "TaskListCmd", cmd: "task list\n", err: nil,
+			name: "TaskListCmd", cmd: "task list\n", want: "task list\n", err: nil,
 		},
 		{
-			name: "TaskDoCmd", cmd: "task do 1\n", err: nil,
+			name: "TaskDoCmd", cmd: "task do 1\n", want: "task do 1\n", err: nil,
 		},
 		{
-			name: "TaskAddCmd", cmd: "task add foo\n", err: nil,
+			name: "TaskAddCmd", cmd: "task add foo\n", want: "task add foo\n", err: nil,
 		},
 		{
-			name: "TaskAddCmd", cmd: "task add foo\n", err: nil,
+			name: "TaskAddCmd", cmd: "task add foo\n", want: "task add foo\n", err: nil,
 		},
-		// {
-		// 	name: "UnknownFooCmd", cmd: "task foo\n", err: ErrUnknownCmd,
-		// },
-		// {
-		// 	name: "UnknownSpamBarCmd", cmd: "task spam bar\n", err: ErrUnknownCmd,
-		// },
+		{
+			name: "UnknownFooCmd", cmd: "task foo\n", want: "", err: ErrUnknownCmd,
+		},
+		{
+			name: "UnknownSpamBarCmd", cmd: "task spam bar\n", want: "", err: ErrUnknownCmd,
+		},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -60,8 +58,8 @@ func TestReadCommand(t *testing.T) {
 			if err != tc.err {
 				t.Fatalf("expected to have %q error but got %q", tc.err, err)
 			}
-			if got != tc.cmd {
-				t.Fatalf("expected to have %q command from input, but got - %q\n", tc.cmd, got)
+			if got != tc.want {
+				t.Fatalf("expected to have %q command from input, but got - %q\n", tc.want, got)
 			}
 		})
 	}
@@ -74,6 +72,7 @@ func TestIsKnownCommand(t *testing.T) {
 		known bool
 	}{
 		{name: "task", cmd: "task", known: true},
+		{name: "taskWithNLCharacter", cmd: "task\n", known: true},
 		{name: "taskWithSomeSpaces", cmd: "  task  ", known: true},
 		{name: "taskDo", cmd: "task do 1", known: true},
 		{name: "taskDoWithSpacesBetweenWords", cmd: "task   do  1", known: true},

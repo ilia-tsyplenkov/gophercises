@@ -2,10 +2,12 @@ package clitask
 
 import (
 	"bufio"
+	"errors"
 	"io"
 	"strings"
 )
 
+var ErrUnknownCmd = errors.New("unsupported command.")
 var knownCommand = []string{"task", "task list", "task do", "task add"}
 
 type Manager struct {
@@ -14,12 +16,19 @@ type Manager struct {
 
 func (m *Manager) ReadCmd() (string, error) {
 	reader := bufio.NewReader(m.input)
-	return reader.ReadString('\n')
+	s, err := reader.ReadString('\n')
+	if err != nil {
+		return "", err
+	}
+	if !m.isKnown(s) {
+		return "", ErrUnknownCmd
+	}
+	return s, nil
 
 }
 
 func (m *Manager) isKnown(s string) bool {
-	s = strings.Trim(s, " ")
+	s = strings.Trim(s, " \n")
 	fixed := ""
 	// remove all unnecessary spaces between words
 	for _, ch := range s {
