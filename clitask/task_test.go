@@ -143,7 +143,7 @@ func TestDoTask(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			todoNum := len(tc.have)
 			store := MemStore{todo: tc.have}
-			err := store.Do(tc.toDo)
+			_, err := store.Do(tc.toDo)
 			if err != tc.err {
 				t.Fatalf("expected to have %v error but got %v\n", tc.err, err)
 			}

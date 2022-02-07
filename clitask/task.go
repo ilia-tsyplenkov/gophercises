@@ -42,17 +42,17 @@ func (s *MemStore) Completed() []Task {
 	return s.done
 }
 
-func (s *MemStore) Do(id int) error {
+func (s *MemStore) Do(id int) (Task, error) {
 	if id < 1 {
-		return ErrUnexpectedId
+		return Task{}, ErrUnexpectedId
 	}
 	if id > len(s.todo) {
-		return io.ErrUnexpectedEOF
+		return Task{}, io.ErrUnexpectedEOF
 	}
 	id--
 	task := s.todo[id]
 	s.todo = append(s.todo[:id], s.todo[id+1:]...)
 	task.done = true
 	s.done = append(s.done, task)
-	return nil
+	return task, nil
 }

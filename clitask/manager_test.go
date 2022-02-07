@@ -122,7 +122,56 @@ func TestHandleWriteError(t *testing.T) {
 
 func TestWork(t *testing.T) {
 
+	testCases := []struct {
+		name    string
+		command string
+		tasks   []string
+		want    string
+		err     error
+	}{
+		{name: "help", command: "task\n", want: helpMsg},
+		{name: "listOneTask", command: "task list\n", tasks: []string{"write test"}, want: "1. write test\n"},
+		{name: "listTwoTasks", command: "task list\n", tasks: []string{"write test", "write code"}, want: "1. write test\n2. write code\n"},
+		{name: "addOneTask", command: "task add write code\n", want: "Added \"write code\" to your task list.\n"},
+		{name: "doOneTask", command: "task do 1\n", tasks: []string{"write test", "write code"}, want: "You have completed the \"write test\" task.\n"},
+	}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			defer func() {
+				os.Remove("testInput")
+				os.Remove("testOutput")
+			}()
+			in, err := os.Create("testInput")
+			if err != nil {
+				t.Fatal("error creating test input file")
+			}
+			defer in.Close()
+			out, err := os.Create("testOutput")
+			if err != nil {
+				t.Fatal("error creating test output file")
+			}
+			defer out.Close()
+			in.WriteString(tc.command)
+			in.Seek(0, 0)
+			store := NewMemStore()
+			for _, task := range tc.tasks {
+				store.Add(task)
+			}
+			manager := Manager{input: in, output: out, store: store}
+			manager.Work()
+			out.Seek(0, 0)
+			res, err := ioutil.ReadAll(out)
+			if err != nil {
+				t.Fatalf("error reading test output: %s\n", err)
+			}
+			got := string(res)
+			if got != tc.want {
+				t.Fatalf("expected to have %q as worker result, but got %q\n", tc.want, got)
+			}
+		})
+	}
 }
+
 func TestFixCommand(t *testing.T) {
 	testCases := []struct {
 		name string
