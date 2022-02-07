@@ -120,6 +120,9 @@ func TestHandleWriteError(t *testing.T) {
 	}
 }
 
+func TestWork(t *testing.T) {
+
+}
 func TestFixCommand(t *testing.T) {
 	testCases := []struct {
 		name string
@@ -164,6 +167,30 @@ func TestIsKnownCommand(t *testing.T) {
 				t.Fatalf("expected to have %v known status of command but got: %v", tc.known, got)
 			}
 
+		})
+	}
+}
+
+func TestSplitOnArgs(t *testing.T) {
+	testCases := []struct {
+		name string
+		have string
+		cmd  string
+		args string
+	}{
+		{name: "task", have: "task", cmd: "task", args: ""},
+		{name: "taskDo", have: "task do 1", cmd: "task do", args: "1"},
+		{name: "taskDoNoId", have: "task do", cmd: "task do", args: ""},
+		{name: "taskAdd", have: "task add spam foo bar", cmd: "task add", args: "spam foo bar"},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			manager := Manager{}
+			cmd, args := manager.splitOnArgs(tc.have)
+			if cmd != tc.cmd && args != tc.args {
+				t.Fatalf("expected to have next splitting - cmd: %q, args: %q, but got - cmd: %q, args: %q\n", tc.cmd, tc.args, cmd, args)
+			}
 		})
 	}
 }

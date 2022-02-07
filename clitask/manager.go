@@ -83,3 +83,14 @@ func (m *Manager) isKnown(s string) bool {
 	}
 	return false
 }
+
+func (m *Manager) splitOnArgs(s string) (string, string) {
+	var cmd, args string
+	parts := strings.Split(s, " ")
+	if len(parts) == 1 {
+		cmd, args = parts[0], ""
+	} else {
+		cmd, args = strings.Join(parts[:2], " "), strings.Join(parts[2:], " ")
+	}
+	return cmd, args
+}
