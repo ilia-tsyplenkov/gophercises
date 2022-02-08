@@ -20,6 +20,9 @@ func TestReadCommand(t *testing.T) {
 			name: "EmptyCmd", cmd: "", want: "", err: io.EOF,
 		},
 		{
+			name: "NewLineCharacter", cmd: "\n", want: "", err: nil,
+		},
+		{
 			name: "TaskCmd", cmd: "task\n", want: "task", err: nil,
 		},
 		{
@@ -130,6 +133,7 @@ func TestWork(t *testing.T) {
 		err     error
 	}{
 		{name: "help", command: "task\n", want: helpMsg},
+		{name: "listEmptyTask", command: "task list\n", tasks: nil, want: EmptyBacklog},
 		{name: "listOneTask", command: "task list\n", tasks: []string{"write test"}, want: "1. write test\n"},
 		{name: "listTwoTasks", command: "task list\n", tasks: []string{"write test", "write code"}, want: "1. write test\n2. write code\n"},
 		{name: "addOneTask", command: "task add write code\n", want: "Added \"write code\" to your task list.\n"},
