@@ -1,6 +1,6 @@
 package clitask
 
-const helpMsg string = `
+const HelpMsg string = `
 task is a CLI for managing your TODOs.
 
 Usage:

@@ -15,21 +15,23 @@ var knownCommand = []string{"task", "task list", "task do", "task add"}
 
 const (
 	EmptyBacklog string = "your backlog is empty.\n"
-	greeting     string = "$ "
+	Greeting     string = "$ "
 )
 
 type Manager struct {
-	input  io.Reader
-	output io.Writer
-	store  *MemStore
+	// reader for output data
+	Input io.Reader
+	// command result writer
+	Output io.Writer
+	Store  *MemStore
 }
 
 func NewManager(in io.Reader, out io.Writer) *Manager {
-	return &Manager{input: in, output: out, store: NewMemStore()}
+	return &Manager{Input: in, Output: out, Store: NewMemStore()}
 }
 
-func (m *Manager) ReadCmd() (string, error) {
-	reader := bufio.NewReader(m.input)
+func (m *Manager) readCmd() (string, error) {
+	reader := bufio.NewReader(m.Input)
 	s, err := reader.ReadString('\n')
 	if err != nil {
 		return "", err
@@ -46,22 +48,22 @@ func (m *Manager) ReadCmd() (string, error) {
 
 }
 
-func (m *Manager) WriteResult(data interface{}) error {
+func (m *Manager) writeResult(data interface{}) error {
 	var err error
 
 	switch d := data.(type) {
 	case []string:
 		for i, s := range d {
 			s = fmt.Sprintf("%d. %s\n", i+1, s)
-			if _, err = m.output.Write([]byte(s)); err != nil {
+			if _, err = m.Output.Write([]byte(s)); err != nil {
 				return err
 			}
 
 		}
 	case error:
-		_, err = m.output.Write([]byte(d.Error()))
+		_, err = m.Output.Write([]byte(d.Error()))
 	case string:
-		_, err = m.output.Write([]byte(d))
+		_, err = m.Output.Write([]byte(d))
 	default:
 		err = fmt.Errorf("unexpected data type.")
 	}
@@ -70,38 +72,38 @@ func (m *Manager) WriteResult(data interface{}) error {
 }
 
 func (m *Manager) Work() error {
-	m.output.Write([]byte(greeting))
-	fullCmd, err := m.ReadCmd()
+	m.Output.Write([]byte(Greeting))
+	fullCmd, err := m.readCmd()
 	if err != nil {
 		return err
 	}
 	cmd, args := m.splitOnArgs(fullCmd)
 	switch cmd {
 	case "task":
-		m.WriteResult(helpMsg)
+		m.writeResult(HelpMsg)
 	case "task list":
-		tasks := m.store.ToDo()
+		tasks := m.Store.ToDo()
 		if len(tasks) == 0 {
-			m.WriteResult(EmptyBacklog)
+			m.writeResult(EmptyBacklog)
 		}
 		t := make([]string, 0)
 		for _, task := range tasks {
 			t = append(t, task.name)
 		}
-		m.WriteResult(t)
+		m.writeResult(t)
 	case "task add":
-		m.store.Add(args)
-		m.WriteResult(fmt.Sprintf("Added %q to your task list.\n", args))
+		m.Store.Add(args)
+		m.writeResult(fmt.Sprintf("Added %q to your task list.\n", args))
 	case "task do":
 		id, err := strconv.Atoi(args)
 		if err != nil {
 			return ErrIncorrectId
 		}
-		task, err := m.store.Do(id)
+		task, err := m.Store.Do(id)
 		if err != nil {
 			return err
 		}
-		m.WriteResult(fmt.Sprintf("You have completed the %q task.\n", task.name))
+		m.writeResult(fmt.Sprintf("You have completed the %q task.\n", task.name))
 	case "":
 		{
 		}
