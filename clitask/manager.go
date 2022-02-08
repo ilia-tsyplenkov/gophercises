@@ -13,7 +13,10 @@ var ErrUnknownCmd = errors.New("unsupported command.")
 var ErrIncorrectId = errors.New("incorrect task id. id must be positibe integer value.")
 var knownCommand = []string{"task", "task list", "task do", "task add"}
 
-const EmptyBacklog string = "your backlog is empty.\n"
+const (
+	EmptyBacklog string = "your backlog is empty.\n"
+	greeting     string = "$ "
+)
 
 type Manager struct {
 	input  io.Reader
@@ -67,6 +70,7 @@ func (m *Manager) WriteResult(data interface{}) error {
 }
 
 func (m *Manager) Work() error {
+	m.output.Write([]byte(greeting))
 	fullCmd, err := m.ReadCmd()
 	if err != nil {
 		return err

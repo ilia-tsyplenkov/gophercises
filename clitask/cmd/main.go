@@ -19,6 +19,5 @@ func main() {
 			}
 		}
 	}
-
 	log.Println("Program exiting.")
 }

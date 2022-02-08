@@ -132,16 +132,16 @@ func TestWork(t *testing.T) {
 		want    string
 		err     error
 	}{
-		{name: "help", command: "task\n", want: helpMsg},
-		{name: "listEmptyTask", command: "task list\n", tasks: nil, want: EmptyBacklog},
-		{name: "listOneTask", command: "task list\n", tasks: []string{"write test"}, want: "1. write test\n"},
-		{name: "listTwoTasks", command: "task list\n", tasks: []string{"write test", "write code"}, want: "1. write test\n2. write code\n"},
-		{name: "addOneTask", command: "task add write code\n", want: "Added \"write code\" to your task list.\n"},
-		{name: "doOneTask", command: "task do 1\n", tasks: []string{"write test", "write code"}, want: "You have completed the \"write test\" task.\n"},
-		{name: "unknownCommand", command: "task foo\n", err: ErrUnknownCmd},
-		{name: "doTaskUnexistingId", command: "task do 10\n", err: io.ErrUnexpectedEOF},
-		{name: "doTaskZeroId", command: "task do 0\n", err: ErrUnexpectedId},
-		{name: "doTaskUnapplicableId", command: "task do foo\n", err: ErrIncorrectId},
+		{name: "help", command: "task\n", want: greeting + helpMsg},
+		{name: "listEmptyTask", command: "task list\n", tasks: nil, want: greeting + EmptyBacklog},
+		{name: "listOneTask", command: "task list\n", tasks: []string{"write test"}, want: greeting + "1. write test\n"},
+		{name: "listTwoTasks", command: "task list\n", tasks: []string{"write test", "write code"}, want: greeting + "1. write test\n2. write code\n"},
+		{name: "addOneTask", command: "task add write code\n", want: greeting + "Added \"write code\" to your task list.\n"},
+		{name: "doOneTask", command: "task do 1\n", tasks: []string{"write test", "write code"}, want: greeting + "You have completed the \"write test\" task.\n"},
+		{name: "unknownCommand", command: "task foo\n", want: greeting, err: ErrUnknownCmd},
+		{name: "doTaskUnexistingId", command: "task do 10\n", want: greeting, err: io.ErrUnexpectedEOF},
+		{name: "doTaskZeroId", command: "task do 0\n", want: greeting, err: ErrUnexpectedId},
+		{name: "doTaskUnapplicableId", command: "task do foo\n", want: greeting, err: ErrIncorrectId},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
