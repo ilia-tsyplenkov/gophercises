@@ -10,6 +10,7 @@ import (
 )
 
 var ErrUnknownCmd = errors.New("unsupported command.")
+var ErrIncorrectId = errors.New("incorrect task id. id must be positibe integer value.")
 var knownCommand = []string{"task", "task list", "task do", "task add"}
 
 type Manager struct {
@@ -55,10 +56,10 @@ func (m *Manager) WriteResult(data interface{}) error {
 	return err
 }
 
-func (m *Manager) Work() {
+func (m *Manager) Work() error {
 	fullCmd, err := m.ReadCmd()
 	if err != nil {
-		panic(err)
+		return err
 	}
 	cmd, args := m.splitOnArgs(fullCmd)
 	switch cmd {
@@ -77,14 +78,17 @@ func (m *Manager) Work() {
 	case "task do":
 		id, err := strconv.Atoi(args)
 		if err != nil {
-			panic(err)
+			return ErrIncorrectId
 		}
 		task, err := m.store.Do(id)
 		if err != nil {
-			panic(err)
+			return err
 		}
 		m.WriteResult(fmt.Sprintf("You have completed the %q task.\n", task.name))
+	default:
+		return fmt.Errorf("command %q is known but not supported by worker yet.\n", cmd)
 	}
+	return nil
 
 }
 

@@ -134,6 +134,10 @@ func TestWork(t *testing.T) {
 		{name: "listTwoTasks", command: "task list\n", tasks: []string{"write test", "write code"}, want: "1. write test\n2. write code\n"},
 		{name: "addOneTask", command: "task add write code\n", want: "Added \"write code\" to your task list.\n"},
 		{name: "doOneTask", command: "task do 1\n", tasks: []string{"write test", "write code"}, want: "You have completed the \"write test\" task.\n"},
+		{name: "unknownCommand", command: "task foo\n", err: ErrUnknownCmd},
+		{name: "doTaskUnexistingId", command: "task do 10\n", err: io.ErrUnexpectedEOF},
+		{name: "doTaskZeroId", command: "task do 0\n", err: ErrUnexpectedId},
+		{name: "doTaskUnapplicableId", command: "task do foo\n", err: ErrIncorrectId},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -158,7 +162,11 @@ func TestWork(t *testing.T) {
 				store.Add(task)
 			}
 			manager := Manager{input: in, output: out, store: store}
-			manager.Work()
+			err = manager.Work()
+			if err != tc.err {
+				t.Fatalf("expected to have next error - %v, but got - %v", tc.err, err)
+			}
+
 			out.Seek(0, 0)
 			res, err := ioutil.ReadAll(out)
 			if err != nil {
