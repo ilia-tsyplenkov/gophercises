@@ -88,7 +88,7 @@ func (m *Manager) Work() error {
 		}
 		t := make([]string, 0)
 		for _, task := range tasks {
-			t = append(t, task.name)
+			t = append(t, task.Name)
 		}
 		m.writeResult(t)
 	case "task add":
@@ -103,7 +103,7 @@ func (m *Manager) Work() error {
 		if err != nil {
 			return err
 		}
-		m.writeResult(fmt.Sprintf("You have completed the %q task.\n", task.name))
+		m.writeResult(fmt.Sprintf("You have completed the %q task.\n", task.Name))
 	case "":
 		{
 		}

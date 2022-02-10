@@ -1,34 +1,36 @@
-package clitask
+package external_tests
 
 import (
 	"fmt"
 	"io"
 	"reflect"
 	"testing"
+
+	ct "github.com/gophercises/clitask"
 )
 
 func TestTaskToDoList(t *testing.T) {
 
 	testCases := []struct {
-		have []Task
-		want []Task
+		have []ct.Task
+		want []ct.Task
 	}{
 		{
 			have: nil, want: nil,
 		},
 		{
-			have: []Task{Task{name: "write test"}},
-			want: []Task{Task{name: "write test"}},
+			have: []ct.Task{ct.Task{Name: "write test"}},
+			want: []ct.Task{ct.Task{Name: "write test"}},
 		},
 		{
-			have: []Task{Task{name: "write test"}, Task{name: "write code"}},
-			want: []Task{Task{name: "write test"}, Task{name: "write code"}},
+			have: []ct.Task{ct.Task{Name: "write test"}, ct.Task{Name: "write code"}},
+			want: []ct.Task{ct.Task{Name: "write test"}, ct.Task{Name: "write code"}},
 		},
 	}
 	for _, tc := range testCases {
 		testName := fmt.Sprintf("%dtasks", len(tc.have))
 		t.Run(testName, func(t *testing.T) {
-			store := MemStore{todo: tc.have}
+			store := ct.MemStore{Todo: tc.have}
 			got := store.ToDo()
 			if !reflect.DeepEqual(got, tc.have) {
 				t.Fatalf("expected to have %v tasks list but got %v\n", tc.have, got)
@@ -39,17 +41,17 @@ func TestTaskToDoList(t *testing.T) {
 }
 
 func TestAddNewTask(t *testing.T) {
-	have := []Task{
-		Task{name: "write test", done: false},
-		Task{name: "write code", done: false},
+	have := []ct.Task{
+		ct.Task{Name: "write test", Done: false},
+		ct.Task{Name: "write code", Done: false},
 	}
-	newTask := Task{name: "pass test", done: false}
+	newTask := ct.Task{Name: "pass test", Done: false}
 
-	store := MemStore{have, nil}
-	want := make([]Task, len(have))
+	store := ct.MemStore{have, nil}
+	want := make([]ct.Task, len(have))
 	copy(want, have)
 	want = append(want, newTask)
-	store.Add(newTask.name)
+	store.Add(newTask.Name)
 	got := store.ToDo()
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("expected to have %v tasks list but got %v\n", want, got)
@@ -59,25 +61,25 @@ func TestAddNewTask(t *testing.T) {
 
 func TestCompletedTaskList(t *testing.T) {
 	testCases := []struct {
-		have []Task
-		want []Task
+		have []ct.Task
+		want []ct.Task
 	}{
 		{
 			have: nil, want: nil,
 		},
 		{
-			have: []Task{Task{name: "write test", done: true}},
-			want: []Task{Task{name: "write test", done: true}},
+			have: []ct.Task{ct.Task{Name: "write test", Done: true}},
+			want: []ct.Task{ct.Task{Name: "write test", Done: true}},
 		},
 		{
-			have: []Task{Task{name: "write test", done: true}, Task{name: "write code", done: true}},
-			want: []Task{Task{name: "write test", done: true}, Task{name: "write code", done: true}},
+			have: []ct.Task{ct.Task{Name: "write test", Done: true}, ct.Task{Name: "write code", Done: true}},
+			want: []ct.Task{ct.Task{Name: "write test", Done: true}, ct.Task{Name: "write code", Done: true}},
 		},
 	}
 	for _, tc := range testCases {
 		testName := fmt.Sprintf("%dtasks", len(tc.have))
 		t.Run(testName, func(t *testing.T) {
-			store := MemStore{done: tc.have}
+			store := ct.MemStore{Done: tc.have}
 			got := store.Completed()
 			if !reflect.DeepEqual(got, tc.have) {
 				t.Fatalf("expected to have %v tasks list but got %v\n", tc.have, got)
@@ -90,8 +92,8 @@ func TestCompletedTaskList(t *testing.T) {
 func TestDoTask(t *testing.T) {
 	testCases := []struct {
 		name string
-		have []Task
-		want []Task
+		have []ct.Task
+		want []ct.Task
 		toDo int
 		err  error
 	}{
@@ -104,36 +106,36 @@ func TestDoTask(t *testing.T) {
 		},
 		{
 			name: "1TaskInBacklogButId2Requested",
-			have: []Task{Task{name: "write test", done: false}},
+			have: []ct.Task{ct.Task{Name: "write test", Done: false}},
 			want: nil,
 			toDo: 2,
 			err:  io.ErrUnexpectedEOF,
 		},
 		{
 			name: "1TaskInBacklogButId0Requested",
-			have: []Task{Task{name: "write test", done: false}},
+			have: []ct.Task{ct.Task{Name: "write test", Done: false}},
 			want: nil,
 			toDo: 0,
-			err:  ErrUnexpectedId,
+			err:  ct.ErrUnexpectedId,
 		},
 		{
 			name: "1TaskId1Requested",
-			have: []Task{Task{name: "write test", done: false}},
-			want: []Task{Task{name: "write test", done: true}},
+			have: []ct.Task{ct.Task{Name: "write test", Done: false}},
+			want: []ct.Task{ct.Task{Name: "write test", Done: true}},
 			toDo: 1,
 			err:  nil,
 		},
 		{
 			name: "2TasksId1Requested",
-			have: []Task{Task{name: "write test", done: false}, Task{name: "write code", done: false}},
-			want: []Task{Task{name: "write test", done: true}},
+			have: []ct.Task{ct.Task{Name: "write test", Done: false}, ct.Task{Name: "write code", Done: false}},
+			want: []ct.Task{ct.Task{Name: "write test", Done: true}},
 			toDo: 1,
 			err:  nil,
 		},
 		{
 			name: "2TasksId2Requested",
-			have: []Task{Task{name: "write test", done: false}, Task{name: "write code", done: false}},
-			want: []Task{Task{name: "write code", done: true}},
+			have: []ct.Task{ct.Task{Name: "write test", Done: false}, ct.Task{Name: "write code", Done: false}},
+			want: []ct.Task{ct.Task{Name: "write code", Done: true}},
 			toDo: 2,
 			err:  nil,
 		},
@@ -142,7 +144,7 @@ func TestDoTask(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			todoNum := len(tc.have)
-			store := MemStore{todo: tc.have}
+			store := ct.MemStore{Todo: tc.have}
 			_, err := store.Do(tc.toDo)
 			if err != tc.err {
 				t.Fatalf("expected to have %v error but got %v\n", tc.err, err)

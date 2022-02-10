@@ -9,17 +9,17 @@ import (
 var ErrUnexpectedId = errors.New("task id must be greater than zero.")
 
 type Task struct {
-	name string
-	done bool
+	Name string
+	Done bool
 }
 
 func (t Task) String() string {
-	return fmt.Sprintf("task: %q done: %v", t.name, t.done)
+	return fmt.Sprintf("task: %q done: %v", t.Name, t.Done)
 }
 
 type MemStore struct {
-	todo []Task
-	done []Task
+	Todo []Task
+	Done []Task
 }
 
 func NewMemStore() *MemStore {
@@ -27,32 +27,32 @@ func NewMemStore() *MemStore {
 }
 
 func (s *MemStore) AllTasks() []Task {
-	return s.todo
+	return s.Todo
 }
 
 func (s *MemStore) ToDo() []Task {
-	return s.todo
+	return s.Todo
 }
 
 func (s *MemStore) Add(task string) {
-	s.todo = append(s.todo, Task{name: task})
+	s.Todo = append(s.Todo, Task{Name: task})
 }
 
 func (s *MemStore) Completed() []Task {
-	return s.done
+	return s.Done
 }
 
 func (s *MemStore) Do(id int) (Task, error) {
 	if id < 1 {
 		return Task{}, ErrUnexpectedId
 	}
-	if id > len(s.todo) {
+	if id > len(s.Todo) {
 		return Task{}, io.ErrUnexpectedEOF
 	}
 	id--
-	task := s.todo[id]
-	s.todo = append(s.todo[:id], s.todo[id+1:]...)
-	task.done = true
-	s.done = append(s.done, task)
+	task := s.Todo[id]
+	s.Todo = append(s.Todo[:id], s.Todo[id+1:]...)
+	task.Done = true
+	s.Done = append(s.Done, task)
 	return task, nil
 }
