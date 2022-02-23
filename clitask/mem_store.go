@@ -15,12 +15,13 @@ func (s *MemStore) AllTasks() []Task {
 	return s.Todo
 }
 
-func (s *MemStore) ToDo() []Task {
-	return s.Todo
+func (s *MemStore) ToDo() ([]Task, error) {
+	return s.Todo, nil
 }
 
-func (s *MemStore) Add(task string) {
+func (s *MemStore) Add(task string) error {
 	s.Todo = append(s.Todo, Task{Name: task})
+	return nil
 }
 
 func (s *MemStore) Completed() []Task {

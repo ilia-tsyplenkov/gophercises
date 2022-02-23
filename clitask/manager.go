@@ -23,7 +23,7 @@ type Manager struct {
 	Input io.Reader
 	// command result writer
 	Output io.Writer
-	Store  *MemStore
+	Store  Storer
 }
 
 func NewManager(in io.Reader, out io.Writer) *Manager {
@@ -82,7 +82,10 @@ func (m *Manager) Work() error {
 	case "task":
 		m.writeResult(HelpMsg)
 	case "task list":
-		tasks := m.Store.ToDo()
+		tasks, err := m.Store.ToDo()
+		if err != nil {
+			return err
+		}
 		if len(tasks) == 0 {
 			m.writeResult(EmptyBacklog)
 		}

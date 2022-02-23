@@ -31,7 +31,7 @@ func TestTaskToDoList(t *testing.T) {
 		testName := fmt.Sprintf("%dtasks", len(tc.have))
 		t.Run(testName, func(t *testing.T) {
 			store := ct.MemStore{Todo: tc.have}
-			got := store.ToDo()
+			got, _ := store.ToDo()
 			if !reflect.DeepEqual(got, tc.have) {
 				t.Fatalf("expected to have %v tasks list but got %v\n", tc.have, got)
 			}
@@ -52,7 +52,7 @@ func TestAddNewTask(t *testing.T) {
 	copy(want, have)
 	want = append(want, newTask)
 	store.Add(newTask.Name)
-	got := store.ToDo()
+	got, _ := store.ToDo()
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("expected to have %v tasks list but got %v\n", want, got)
 	}
@@ -155,7 +155,8 @@ func TestDoTask(t *testing.T) {
 			}
 			if tc.want != nil {
 				t.Log("Check that ToDo backlog has been reduced.")
-				gotTodoNum := len(store.ToDo())
+				tasks, _ := store.ToDo()
+				gotTodoNum := len(tasks)
 				wantTodoNum := todoNum - 1
 				if gotTodoNum != wantTodoNum {
 					t.Fatalf("expected to have %d tasks in backlog but got %d\n", wantTodoNum, gotTodoNum)
