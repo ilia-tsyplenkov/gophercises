@@ -14,6 +14,12 @@ type DbStore struct {
 	Bucket string
 }
 
+func NewDbStore(dbFile, bucket string) *DbStore {
+	store := &DbStore{DbFile: dbFile, Bucket: bucket}
+	store.createBucket()
+	return store
+}
+
 func (s *DbStore) ToDo() ([]Task, error) {
 	db, err := bolt.Open(s.DbFile, 0600, nil)
 	if err != nil {
@@ -25,7 +31,7 @@ func (s *DbStore) ToDo() ([]Task, error) {
 	err = db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(s.Bucket))
 		if b == nil {
-			return fmt.Errorf("%s bucket wasn't found.", s.Bucket)
+			return fmt.Errorf("%q bucket wasn't found.", s.Bucket)
 		}
 		c := b.Cursor()
 		for k, v := c.First(); k != nil; k, v = c.Next() {
@@ -111,6 +117,21 @@ func (s *DbStore) Do(id int) (Task, error) {
 	err = s.Update(todo)
 	return todo, err
 
+}
+
+func (s *DbStore) createBucket() error {
+	db, err := bolt.Open(s.DbFile, 0600, nil)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	err = db.Update(func(tx *bolt.Tx) error {
+		_, err := tx.CreateBucketIfNotExists([]byte(s.Bucket))
+
+		return err
+	})
+	return err
 }
 
 // itob returns an 8-byte big endian representation of v.

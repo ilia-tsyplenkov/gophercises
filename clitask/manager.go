@@ -26,8 +26,8 @@ type Manager struct {
 	Store  Storer
 }
 
-func NewManager(in io.Reader, out io.Writer) *Manager {
-	return &Manager{Input: in, Output: out, Store: NewMemStore()}
+func NewManager(in io.Reader, out io.Writer, store Storer) *Manager {
+	return &Manager{Input: in, Output: out, Store: store}
 }
 
 func (m *Manager) readCmd() (string, error) {
