@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/gophercises/clitask"
+	"github.com/ilia-tsyplenkov/gophercises/clitask"
 )
 
 func main() {

@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/gophercises/clitask"
+	"github.com/ilia-tsyplenkov/gophercises/clitask"
 )
 
 func TestWork(t *testing.T) {

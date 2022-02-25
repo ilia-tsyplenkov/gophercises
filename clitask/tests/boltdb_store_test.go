@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	ct "github.com/gophercises/clitask"
+	ct "github.com/ilia-tsyplenkov/gophercises/clitask"
 	bolt "go.etcd.io/bbolt"
 )
 
@@ -130,7 +130,7 @@ func tasksEqual(got, want []ct.Task) bool {
 		return false
 	}
 	for i, v := range got {
-		if v.Name != want[i].Name || v.Done || want[i].Done {
+		if v.Name != want[i].Name || v.Done != want[i].Done {
 			return false
 		}
 	}
@@ -161,5 +161,4 @@ func prepareDb(dbFile string, bucket string, data []ct.Task) error {
 		return nil
 	})
 	return err
-
 }

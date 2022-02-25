@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	ct "github.com/gophercises/clitask"
+	ct "github.com/ilia-tsyplenkov/gophercises/clitask"
 )
 
 func TestTaskToDoList(t *testing.T) {
