@@ -39,8 +39,22 @@ You have the following tasks:
 
 *Note: Lines prefixed with `$` are lines where we type into the terminal, and other lines are output from our program.*
 
+### 1. Build the CLI shell
+
 Your final CLI won't need to look exactly like this, but this is what I roughly expect mine to look like. In the bonus section we will also discuss a few extra features we could add, but for now we will stick with the three show above:
 
 - `add` - adds a new task to our list
 - `list` - lists all of our incomplete tasks
 - `do` - marks a task as complete
+
+### 2. Write the BoltDB interactions
+
+After stubbing out your CLI commands, try writing code that will read, add, and delete data in a BoltDB database. You can find more information about using Bolt here: <https://github.com/etcd-io/bbolt>
+
+For now, don't worry about where you store the database that bolt connects to. At this stage I intend to just use whatever directory the `task` command was run from, so I will be using code roughly like this:
+
+```go
+db, err := bolt.Open("tasks.db", 0600, nil)
+```
+
+Later you can dig into how to install the application so that it can be run from anywhere and it will persist our tasks regardless of where we run the CLI.
