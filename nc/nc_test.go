@@ -51,7 +51,7 @@ func TestServerRead(t *testing.T) {
 	}
 }
 
-func prepareConnections(server *ncServer, t *testing.T) net.Conn {
+func prepareConnections(server *NCserver, t *testing.T) net.Conn {
 	t.Helper()
 	var err error
 	done := make(chan struct{})
@@ -78,9 +78,9 @@ func prepareConnections(server *ncServer, t *testing.T) net.Conn {
 	return clientConn
 
 }
-func prepareServer(connType, addr string, t *testing.T) *ncServer {
+func prepareServer(connType, addr string, t *testing.T) *NCserver {
 	t.Helper()
-	server := &ncServer{connType: "tcp", addr: testAddr}
+	server := &NCserver{connType: "tcp", addr: testAddr}
 	_, err := server.Listen()
 	if err != nil {
 		t.Fatalf("unexpected fail to create a listener: %s\n", err)
