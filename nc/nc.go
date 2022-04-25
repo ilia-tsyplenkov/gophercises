@@ -12,6 +12,11 @@ type Server struct {
 func NewServer(addr, connType string) *Server {
 	return &Server{connType: connType, addr: addr}
 }
+
+func NewClient(addr, connType string) *Client {
+	return &Client{connType: connType, addr: addr}
+}
+
 func (s *Server) Listen() (net.Listener, error) {
 	var err error
 	s.listener, err = net.Listen(s.connType, s.addr)
